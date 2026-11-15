@@ -234,6 +234,18 @@ header{justify-content:flex-start}.controls{margin-left:auto}.library-anchor{pos
 .content.about-mode .code{unicode-bidi:isolate;white-space:nowrap}
 .content.about-mode [id]{scroll-margin-top:calc(var(--read-header-height,100px) + 85px)}
 
+/* READIQ_BISMILLAH_BOLD_V1 */
+.hero > strong {
+    font-family: 'Noto Naskh Arabic', 'Traditional Arabic', serif;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.8;
+    color: #805308;
+    text-align: center;
+}
+@media (max-width: 760px) {
+    .hero > strong { font-size: 22px; }
+}
 </style></head>
 <body><header><div class="brand"><div class="brand-logo">☀️</div><div><h1>IRFAN-UL-QURAN <span class="brand-reflect">· READ • REFLECT</span></h1><small>DeTLeng Read IQ</small></div></div><div class="library-anchor"><button class="file-toggle" id="fileToggle" aria-expanded="false" aria-controls="fileMenu">📚 Library <span id="fileMenuCount">(0)</span> ▾</button><!-- READIQ_ABOUT_V1 --><a class="file-toggle readiq-about-link" href="about.html">About</a></div>
 <button type="button" class="mobile-tools-toggle" id="mobileToolsButton" aria-label="Reading settings" aria-controls="readingTools" aria-expanded="false">⚙</button><div class="controls" id="readingTools"><span class="control-label">FONT SIZE</span><button class="size-btn" id="minus" title="Smaller text">−</button><input type="range" id="fontSlider" min="18" max="72" step="1" aria-label="Font size"><button class="size-btn" id="plus" title="Larger text">+</button><span class="font-chip" id="fontValue">31px</span><button class="action" id="reset">Reset</button><button class="action" id="fullscreen">⛶ Full screen</button></div></header>
