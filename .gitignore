@@ -1,0 +1,6 @@
+_site/
+_site-next/
+__pycache__/
+*.pyc
+*.bak
+.openai/

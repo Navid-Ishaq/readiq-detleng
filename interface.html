@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="favicon.svg" type="image/svg+xml"><meta name="description" content="Read, reflect and discover across languages. Explore the DeTLeng reading library."><title>Irfan-ul-Quran — DeTLeng Read IQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--size:31px;--ink:#18355d;--muted:#587392;--blue:#087ac8;--gold:#f6a915;--bg:#f4fbff}*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;background:radial-gradient(circle at 85% 2%,#fff0aa 0,transparent 32%),linear-gradient(120deg,#e1f6ff,#fffef2 65%,#eafaff);min-height:100vh}
+header{padding:20px clamp(18px,4vw,60px) 12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px}
+.brand{display:flex;align-items:center;gap:13px}.brand-logo{display:grid;place-items:center;width:56px;height:56px;border-radius:19px;background:linear-gradient(145deg,#ffcf52,#ff9c19);box-shadow:0 6px 20px #efa92b45;font-size:28px}
+.brand h1{font-size:clamp(21px,2.3vw,31px);margin:0;font-weight:850;letter-spacing:-.8px}.brand small{display:block;font-size:13px;color:var(--muted);letter-spacing:.5px;margin-top:2px}
+.controls{display:flex;align-items:center;flex-wrap:wrap;gap:9px;background:#ffffffdf;padding:9px 12px;border:1px solid #d6ecfb;border-radius:20px;box-shadow:0 9px 25px #4d8caf15}
+button{font:inherit;cursor:pointer} .size-btn{border:0;border-radius:12px;background:#e4f3ff;color:#0668aa;font-size:25px;font-weight:800;width:43px;height:43px}.size-btn:hover{background:#c5e9ff}.font-chip{min-width:78px;text-align:center;font-weight:750;font-size:15px}.control-label{font-size:13px;font-weight:700;color:var(--muted)}input[type=range]{width:123px;accent-color:#087ac8;cursor:pointer}
+.action{border:1px solid #bcdef1;background:#fff;color:#176b9a;border-radius:11px;padding:11px 13px;font-weight:750}.action:hover{background:#e7f7ff}
+main{max-width:1600px;margin:auto;padding:7px clamp(12px,3vw,44px) 50px}.hero{border:1px solid #ffe39c;background:linear-gradient(100deg,#fff8d4,#fff,#e5faff);padding:15px 22px;border-radius:19px;margin-bottom:17px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;box-shadow:0 10px 28px #c39e2c12}.hero strong{color:#956207;font-size:16px}.hero span{font-size:13px;color:#57718e}
+.tab-wrap{background:#ffffffb8;border-radius:21px 21px 0 0;padding:12px 12px 0;border:1px solid #d6eaf6;border-bottom:0}.tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:thin;padding-bottom:12px}.tab{white-space:nowrap;border:1px solid #d2e9f8;border-radius:13px;padding:12px 19px;background:#eff8ff;color:#356783;font-weight:750;font-size:15px;max-width:360px;overflow:hidden;text-overflow:ellipsis;flex:0 0 auto}.tab:hover{background:#ddf3ff}.tab.active{background:linear-gradient(110deg,#037dd0,#24b4df);border-color:#168fcb;color:#fff;box-shadow:0 5px 12px #0b9bcd33}
+.reader{background:#fff;border:1px solid #d4e9f7;border-radius:0 0 22px 22px;min-height:55vh;padding:clamp(22px,5vw,78px);box-shadow:0 20px 65px #477c9d1c}.dochead{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-bottom:18px;margin-bottom:25px;border-bottom:2px solid #e3f4fc}.dochead h2{margin:0;font-size:clamp(18px,1.9vw,26px);overflow-wrap:anywhere;color:#0576af}.pill{padding:8px 12px;border-radius:99px;background:#e2f9e7;color:#238449;font-size:12px;font-weight:800}.content{font-size:var(--size);line-height:1.95;font-weight:520;overflow-wrap:anywhere}.content .para{margin:0 0 1.1em}.content .centered{text-align:center}.content [dir=rtl]{font-family:'Noto Naskh Arabic','Traditional Arabic','Segoe UI',serif;line-height:2.05;font-weight:500;text-align:right;letter-spacing:0}.content .heading{font-size:1.14em;color:#116b9f;margin:1.15em 0 .65em;font-weight:800}.content [dir=rtl].heading{line-height:1.9;font-weight:700}.empty{text-align:center;padding:12vh 15px;color:#57789a}.empty .sun{font-size:58px;margin-bottom:15px}.empty h2{font-size:29px;color:#1a7eac}.footer{text-align:center;margin:24px 0;color:#6a8baa;font-size:13px}.search{border:1px solid #cfe7f6;padding:12px 15px;border-radius:12px;background:#fbfeff;min-width:180px;font-size:14px;max-width:280px}.match{background:#fff1a2;border-radius:4px}.status-dot{display:inline-block;height:8px;width:8px;border-radius:50%;background:#31be75;margin-right:6px}
+@media(max-width:650px){header{padding:14px}main{padding:5px 9px 25px}.controls{width:100%}.reader{padding:22px 16px}.tab{font-size:13px;padding:11px 13px}.hero{padding:13px}.content{line-height:1.7}.control-label{display:none}}
+@media print{header,.hero,.tab-wrap,.dochead .pill,.footer{display:none!important}body{background:white}.reader{border:0;box-shadow:none;padding:0}.content{font-size:20pt}}
+/* Simple first-version layout, with fixed header and a file-card menu */
+:root{--scroll-bg:#fff8d9}
+body{background:var(--scroll-bg);transition:background-color 1.1s ease}
+header{position:sticky;top:0;z-index:100;background:rgba(255,253,244,.96);backdrop-filter:blur(12px);border-bottom:1px solid #dce8ed;box-shadow:0 6px 22px #173f6512}
+.file-toggle{border:1px solid #b9d7eb;color:#144d79;background:#e4f4ff;border-radius:13px;padding:12px 18px;font-weight:800;white-space:nowrap}
+.file-toggle[aria-expanded=true]{color:white;background:#087ac8}
+.file-menu{position:fixed;z-index:101;top:var(--header-bottom,100px);left:0;right:0;background:rgba(251,253,255,.98);border:1px solid #cfe3f2;box-shadow:0 19px 40px #1a4c7029;border-radius:0 0 22px 22px;padding:22px clamp(16px,4vw,60px) 26px;max-height:65vh;overflow:auto}
+.file-menu[hidden]{display:none!important}
+.file-menu h2{margin:0 0 15px;font-size:23px;color:#154d75}
+.file-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:13px}
+.file-card{padding:19px 18px;background:linear-gradient(130deg,#ffffff,#edf8ff);border:1px solid #c6e2f3;border-radius:18px;min-height:125px;text-align:left;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:12px;color:#163c64;box-shadow:0 5px 14px #1d5f8d12}
+.file-card:hover{background:linear-gradient(130deg,#fffceb,#e3f6fc);border-color:#77bde4;transform:translateY(-2px)}
+.file-card.active{border:2px solid #118acb;background:#e8f7ff}
+.file-card .file-language{color:#806023;font-weight:800;font-size:14px}
+.file-card .file-title{font-weight:750;font-size:17px;line-height:1.5}
+.file-menu small{color:#57738e}
+.tab-wrap{display:none}
+.reader{background:var(--reader-bg,#fffdf8);transition:background-color 1.1s ease}
+@media(max-width:650px){header{gap:12px}.file-menu{max-height:70vh}.file-toggle{padding:10px 12px}}
+@media print{.file-toggle,.file-menu{display:none!important}}
+
+/* Library-only additions. Original reading typography and colours are retained. */
+header{justify-content:flex-start}.controls{margin-left:auto}.library-anchor{position:relative}.file-toggle{min-height:48px}
+.file-menu{left:var(--menu-left,18px);right:auto;top:var(--header-bottom,100px);width:min(560px,calc(100vw - 28px));max-height:min(68dvh,650px);padding:0;border-radius:15px;overflow:auto;background:#fbfdff}
+.library-toolbar{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:14px 17px;border-bottom:1px solid #d6eaf6;background:#f4fbff;position:sticky;top:0;z-index:2}.library-toolbar h2{margin:0;font-size:23px}.library-toolbar .action{font-size:14px;padding:9px 11px}.library-list{padding:9px 12px 15px}.library-list details{margin:2px 0}.library-list summary,.library-file{padding:10px 11px;border-radius:8px;line-height:1.5;overflow-wrap:anywhere;font-size:16px;color:#18355d}.library-list summary{cursor:pointer;list-style:none;display:flex;align-items:flex-start;gap:8px}.library-list summary::-webkit-details-marker{display:none}.library-list summary:before{content:'▸';flex:0 0 12px}.library-list details[open]>summary:before{content:'▾'}.library-children{margin-left:clamp(4px,1vw,12px);border-left:1px solid #d6eaf6;padding-left:6px}.library-file{display:block;width:100%;border:0;background:transparent;text-align:left;cursor:pointer}.library-file:hover,.library-list summary:hover{background:#e4f3ff}.library-file.active{background:#dcefff;box-shadow:inset 3px 0 #087ac8}.folder-name,.file-name{unicode-bidi:plaintext}.library-empty{padding:10px;color:#587392;font-size:14px}.folder-count{color:#587392;font-size:13px;margin-left:auto;white-space:nowrap}
+#libraryDialog{border:1px solid #cfe3f2;border-radius:0;padding:0;width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;background:#fbfdff;color:#18355d}#libraryDialog::backdrop{background:#18355d55}.library-location{display:flex;align-items:center;gap:15px;padding:14px 20px;border-bottom:1px solid #d6eaf6;flex-wrap:wrap}#breadcrumbs{display:flex;align-items:center;flex-wrap:wrap;gap:7px}#breadcrumbs button{background:none;border:0;color:#0668aa;padding:4px;text-decoration:underline;overflow-wrap:anywhere}.expanded-files{padding:18px 24px;max-width:1200px;margin:auto}.expanded-files .library-file{padding:14px 16px;border-bottom:1px solid #e3f0f7;display:flex;gap:12px;align-items:center}.expanded-files .library-file span:last-child{margin-left:auto;font-size:13px;color:#587392}.footer{font-size:16px;color:#3d5d7a;line-height:1.7}.footer a{color:#076da5;font-weight:700;text-underline-offset:3px}:focus-visible{outline:3px solid #087ac8;outline-offset:3px}body:has(dialog[open]){overflow:hidden}
+@media(max-width:760px){header{gap:12px}.controls{margin-left:0;width:100%}.file-menu{width:calc(100vw - 28px)}.library-anchor{margin-left:auto}.brand h1{font-size:24px}.brand small{font-size:10px}.file-toggle{padding:10px}.footer{font-size:15px}.expanded-files{padding:12px}.library-toolbar{padding:12px}.library-toolbar .action{font-size:13px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+@media print{#libraryDialog,.library-anchor{display:none!important}}
+
+/* READ_MOBILE_HEADER_V1 */
+.mobile-tools-toggle{display:none}
+@media(max-width:760px){
+ header{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:6px;padding:8px 10px;align-items:center
+ }
+ header .brand{gap:6px;min-width:0}
+ header .brand>div:last-child{min-width:0}
+ header .brand-logo{
+  width:30px;height:30px;border-radius:10px;
+  font-size:19px;flex-shrink:0
+ }
+ header .brand h1{
+  font-size:17px;letter-spacing:-.4px;white-space:nowrap
+ }
+ header .brand small{display:none}
+ header .library-anchor{margin:0;min-width:0}
+ header .file-toggle{
+  font-size:12px;padding:8px;min-height:36px;border-radius:10px
+ }
+ header #fileMenuCount{display:none}
+ .mobile-tools-toggle{
+  display:grid;place-items:center;
+  width:36px;height:36px;padding:0;
+  border:1px solid #bcdef1;border-radius:10px;
+  background:#fff;color:#176b9a;font-size:21px
+ }
+ .mobile-tools-toggle[aria-expanded=true]{background:#e4f3ff}
+ header .controls{
+  display:none;grid-column:1/-1;width:100%;
+  margin:0;padding:8px;gap:8px;border-radius:12px
+ }
+ header.mobile-tools-open .controls{display:flex}
+ header .controls .font-chip{min-width:42px;font-size:13px}
+ header .controls input[type=range]{
+  width:90px;flex:1;min-width:60px
+ }
+ header .controls .size-btn{
+  width:36px;height:36px;font-size:22px
+ }
+ header .controls .action{
+  font-size:13px;padding:8px 10px;min-height:36px
+ }
+}
+@media print{.mobile-tools-toggle{display:none!important}}
+
+/* READ_STICKY_BISMILLAH_V1 */
+.hero{
+ position:sticky;
+ top:var(--read-header-height,0px);
+ z-index:90;
+}
+@media(max-width:760px){
+ .hero{padding:8px 12px;gap:5px}
+ .hero strong{font-size:14px}
+ .hero span{font-size:11px}
+}
+
+/* Read IQ: source-faithful verse layout and compact quarter selection */
+.brand h1{font-size:clamp(18px,2vw,28px);letter-spacing:-.5px}.brand-reflect{font-size:.58em;white-space:nowrap}.brand small{font-size:13px;letter-spacing:.5px}
+.language-picks{border:0;border-bottom:1px solid #d6eaf6;margin:0;padding:14px 18px}.language-picks legend{float:left;width:100%;font-size:13px;color:#587392;font-weight:700;margin-bottom:6px}.language-picks label{display:flex;align-items:center;gap:11px;padding:9px 0;min-height:42px;font-size:16px}.language-picks input{width:19px;height:19px;accent-color:#087ac8}.quarter-list{padding:0 0 8px 18px}.quarter-row{display:block;text-align:left;width:100%;background:transparent;border:0;border-radius:8px;padding:12px 10px;color:#18355d;font-size:15px;line-height:1.7;overflow-wrap:anywhere}.quarter-row span[lang=ur]{font-family:'Noto Naskh Arabic',serif;font-size:17px}.quarter-row:hover,.quarter-row.active{background:#e4f3ff}.quarter-row:disabled{opacity:.5;cursor:default}.language-summary{font-size:12px;color:#587392}.content .verse{padding:30px 0;border-bottom:1px solid #dcebe7}.content .verse:last-child{border-bottom:0}.content .verse-code{font:600 11px/1.5 system-ui,sans-serif;letter-spacing:.6px;color:#5c7d77;text-align:center;margin-bottom:20px}.content .verse-ar{font-family:'Noto Naskh Arabic','Traditional Arabic',serif;font-size:1.36em;line-height:2.05;font-weight:700;text-align:right;color:#163e38;margin:0 0 24px}.content .verse-ur{font-family:'Noto Naskh Arabic','Traditional Arabic',serif;font-size:1em;line-height:2.05;font-weight:400;text-align:right;margin:0 0 20px}.content .verse-en{font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;font-size:.75em;line-height:1.85;font-weight:400;text-align:left;margin:0}.content .verse p:last-child{margin-bottom:0}.content .verse p{white-space:pre-line;overflow-wrap:anywhere}.hero{position:sticky;top:var(--read-header-height,0px);z-index:90}.file-menu{max-height:min(68dvh,calc(100dvh - var(--read-header-height,80px) - 20px))}
+@media(max-width:760px){header .brand h1{font-size:15px;white-space:normal}header .brand-reflect{display:block;font-size:9px;letter-spacing:.15px}header .brand small{display:block;font-size:10px;letter-spacing:.1px}header .brand-logo{width:30px;height:30px}.hero{padding:8px 12px;gap:4px}.hero strong{font-size:14px}.hero span{font-size:11px}.quarter-row{font-size:14px;padding:11px 7px}.quarter-list{padding-left:8px}.content .verse{padding:24px 0}.reader{padding:22px 16px}.language-summary{width:100%}}
+
+/* READIQ_ALIGNMENT_V1 */
+.file-menu{
+ overflow-x:hidden;
+}
+.language-picks{
+ min-width:0;
+ min-inline-size:0;
+ width:100%;
+ direction:ltr;
+}
+.language-picks legend{
+ float:none;
+ width:auto;
+ display:block;
+ padding:0;
+ margin-bottom:6px;
+ text-align:left;
+}
+.language-picks label{
+ display:flex;
+ width:100%;
+ clear:both;
+ direction:ltr;
+ justify-content:flex-start;
+ text-align:left;
+}
+.language-picks input{
+ flex:0 0 19px;
+ margin:0;
+}
+.hero{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+ align-items:center;
+}
+.hero>strong{
+ grid-column:2;
+ text-align:center;
+}
+.hero>span{
+ grid-column:3;
+ justify-self:end;
+ text-align:right;
+ min-width:0;
+}
+@media(max-width:760px){
+ .hero{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+ }
+ .hero>strong,.hero>span{
+  width:100%;
+  text-align:center;
+ }
+}
+</style></head>
+<body><header><div class="brand"><div class="brand-logo">☀️</div><div><h1>IRFAN-UL-QURAN <span class="brand-reflect">· READ • REFLECT</span></h1><small>DeTLeng Read IQ</small></div></div><div class="library-anchor"><button class="file-toggle" id="fileToggle" aria-expanded="false" aria-controls="fileMenu">📚 Library <span id="fileMenuCount">(0)</span> ▾</button></div>
+<button type="button" class="mobile-tools-toggle" id="mobileToolsButton" aria-label="Reading settings" aria-controls="readingTools" aria-expanded="false">⚙</button><div class="controls" id="readingTools"><span class="control-label">FONT SIZE</span><button class="size-btn" id="minus" title="Smaller text">−</button><input type="range" id="fontSlider" min="18" max="72" step="1" aria-label="Font size"><button class="size-btn" id="plus" title="Larger text">+</button><span class="font-chip" id="fontValue">31px</span><button class="action" id="reset">Reset</button><button class="action" id="fullscreen">⛶ Full screen</button></div></header>
+<div class="file-menu" id="fileMenu" hidden aria-label="Reading library"><div class="library-toolbar"><strong>📚 Library</strong></div><fieldset class="language-picks"><legend>Display languages</legend><label><input type="checkbox" data-language="ar" checked> Arabic</label><label><input type="checkbox" data-language="ur" checked> Urdu</label><label><input type="checkbox" data-language="en" checked> English</label></fieldset><div class="library-list" id="fileCards"></div></div>
+
+<main><div class="hero"><strong>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ✨</strong><span><span class="status-dot"></span><span id="status">Opening library…</span></span></div>
+<div class="tab-wrap"><nav class="tabs" id="tabs" aria-label="Library documents"></nav></div><section class="reader"><div class="dochead"><h2 id="documentTitle">Welcome to your reading space</h2><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><input class="search" id="search" type="search" placeholder="Find in opened file…" aria-label="Search within document"><span id="languageSummary" class="language-summary"></span><span class="pill" id="fileCount">0 FILES</span></div></div><article class="content" id="content"><div class="empty"><div class="sun">📖</div><h2>Your reading journey starts here</h2><p>Choose a document from the Library to begin reading.</p></div></article></section><div class="footer">Read at your own pace. Reflect on every verse. · <a href="https://www.detleng.com/" target="_blank" rel="noopener noreferrer">Explore DeTLeng ↗</a></div></main>
+<script defer src="app.js"></script></body></html>
