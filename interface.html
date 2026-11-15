@@ -203,6 +203,17 @@ header{justify-content:flex-start}.controls{margin-left:auto}.library-anchor{pos
 }
 @media print{#paraMenu{display:none!important}}
 
+/* READIQ_SURAHS_V1 */
+.surah-list{padding:8px 12px 14px}
+.surah-option{display:block;width:100%;border:0;border-radius:9px;background:transparent;text-align:left;color:#18355d;padding:11px 13px;line-height:1.65}
+.surah-option:hover,.surah-option.active{background:#e4f3ff}
+.surah-option:disabled{opacity:.45;cursor:default}
+.surah-option-title{display:block;font-size:16px;font-weight:700}
+.surah-option small{display:block;font-family:'Noto Naskh Arabic','Traditional Arabic',serif;font-size:18px;text-align:left;padding-left:34px;color:#587392}
+#surahMenu{overflow-x:hidden}
+@media(max-width:760px){header .library-anchor{gap:6px;flex-wrap:wrap}header .file-toggle{font-size:12px;padding:8px}}
+@media print{#surahMenu{display:none!important}}
+
 </style></head>
 <body><header><div class="brand"><div class="brand-logo">☀️</div><div><h1>IRFAN-UL-QURAN <span class="brand-reflect">· READ • REFLECT</span></h1><small>DeTLeng Read IQ</small></div></div><div class="library-anchor"><button class="file-toggle" id="fileToggle" aria-expanded="false" aria-controls="fileMenu">📚 Library <span id="fileMenuCount">(0)</span> ▾</button></div>
 <button type="button" class="mobile-tools-toggle" id="mobileToolsButton" aria-label="Reading settings" aria-controls="readingTools" aria-expanded="false">⚙</button><div class="controls" id="readingTools"><span class="control-label">FONT SIZE</span><button class="size-btn" id="minus" title="Smaller text">−</button><input type="range" id="fontSlider" min="18" max="72" step="1" aria-label="Font size"><button class="size-btn" id="plus" title="Larger text">+</button><span class="font-chip" id="fontValue">31px</span><button class="action" id="reset">Reset</button><button class="action" id="fullscreen">⛶ Full screen</button></div></header>
