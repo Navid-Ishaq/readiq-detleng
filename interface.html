@@ -183,6 +183,26 @@ header{justify-content:flex-start}.controls{margin-left:auto}.library-anchor{pos
  vertical-align:.2em;
  opacity:.65;
 }
+/* READIQ_PARAS_V1 */
+.library-anchor{display:flex;align-items:center;gap:8px}
+.para-list{padding:8px 12px 14px}
+.para-option{display:block;width:100%;border:0;border-radius:9px;background:transparent;text-align:left;color:#18355d;padding:11px 13px;line-height:1.65}
+.para-option:hover,.para-option.active{background:#e4f3ff}
+.para-option:disabled{opacity:.45;cursor:default}
+.para-option-title{display:block;font-size:16px;font-weight:700}
+.para-option-title [lang=ar]{font-family:'Noto Naskh Arabic','Traditional Arabic',serif;font-size:21px}
+.para-option small{display:block;font-size:13px;color:#587392;padding-left:29px}
+#paraMenu{overflow-x:hidden}
+@media(max-width:760px){
+ header{grid-template-columns:minmax(0,1fr) auto}
+ header .brand{grid-column:1;grid-row:1}
+ header .mobile-tools-toggle{grid-column:2;grid-row:1}
+ header .library-anchor{grid-column:1/-1;grid-row:2;justify-content:flex-start}
+ header .controls{grid-column:1/-1;grid-row:3}
+ header .brand-reflect{display:inline}
+}
+@media print{#paraMenu{display:none!important}}
+
 </style></head>
 <body><header><div class="brand"><div class="brand-logo">☀️</div><div><h1>IRFAN-UL-QURAN <span class="brand-reflect">· READ • REFLECT</span></h1><small>DeTLeng Read IQ</small></div></div><div class="library-anchor"><button class="file-toggle" id="fileToggle" aria-expanded="false" aria-controls="fileMenu">📚 Library <span id="fileMenuCount">(0)</span> ▾</button></div>
 <button type="button" class="mobile-tools-toggle" id="mobileToolsButton" aria-label="Reading settings" aria-controls="readingTools" aria-expanded="false">⚙</button><div class="controls" id="readingTools"><span class="control-label">FONT SIZE</span><button class="size-btn" id="minus" title="Smaller text">−</button><input type="range" id="fontSlider" min="18" max="72" step="1" aria-label="Font size"><button class="size-btn" id="plus" title="Larger text">+</button><span class="font-chip" id="fontValue">31px</span><button class="action" id="reset">Reset</button><button class="action" id="fullscreen">⛶ Full screen</button></div></header>
