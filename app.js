@@ -18,7 +18,7 @@ function selectedLanguages(){return checks.filter(c=>c.checked).map(c=>c.dataset
 function render(){const langs=selectedLanguages();content.replaceChildren();document.getElementById('languageSummary').textContent=langs.map(k=>({ar:'Arabic',ur:'Urdu',en:'English'})[k]).join(' · ');document.getElementById('fileCount').textContent=verses.length+' VERSES';
 if(!langs.length){const p=document.createElement('p');p.className='empty';p.textContent='Choose Arabic, Urdu or English from Library.';content.append(p);return}
 if(!verses.length){const p=document.createElement('p');p.className='empty';p.textContent='Choose a quarter from Library to begin reading.';content.append(p);return}
-for(const v of verses){const section=document.createElement('section');section.className='verse';section.setAttribute('aria-label',v.code);const code=document.createElement('div');code.className='verse-code';code.dir='ltr';code.textContent=v.code;section.append(code);for(const k of ['ar','ur','en']){if(!langs.includes(k))continue;const p=document.createElement('p');p.className='verse-'+k;p.lang=k;p.dir=k==='en'?'ltr':'rtl';p.textContent=k==='ar'?cleanArabicEnd(v[k]):v[k];section.append(p)}content.append(section)}highlight();}
+for(const v of verses){const section=document.createElement('section');section.className='verse';section.setAttribute('aria-label',v.code);const code=document.createElement('div');code.className='verse-code';code.dir='ltr';code.textContent=v.code;section.append(code);for(const k of ['ar','ur','en']){if(!langs.includes(k))continue;const p=document.createElement('p');p.className='verse-'+k;p.lang=k;p.dir=k==='en'?'ltr':'rtl';p.textContent=k==='ar'?cleanArabicEnd(v[k]):cleanTranslationMarkers(v[k]);section.append(p)}content.append(section)}highlight();}
 function highlight(){content.querySelectorAll('mark').forEach(m=>m.replaceWith(document.createTextNode(m.textContent)));content.normalize();const term=search.value.trim();if(!term)return;const walker=document.createTreeWalker(content,NodeFilter.SHOW_TEXT),nodes=[];let node;while(node=walker.nextNode())if(node.nodeValue.toLowerCase().includes(term.toLowerCase()))nodes.push(node);for(const n of nodes){const raw=n.nodeValue,frag=document.createDocumentFragment();let pos=0,at;while((at=raw.toLowerCase().indexOf(term.toLowerCase(),pos))!==-1){frag.append(document.createTextNode(raw.slice(pos,at)));const m=document.createElement('mark');m.className='match';m.textContent=raw.slice(at,at+term.length);frag.append(m);pos=at+term.length}frag.append(document.createTextNode(raw.slice(pos)));n.replaceWith(frag)}}
 checks.forEach(c=>c.onchange=()=>{save('readiq-languages',selectedLanguages());render()});search.oninput=()=>{highlight();content.querySelector('mark')?.scrollIntoView({block:'center',behavior:'smooth'})};
 async function openFile(file){selected=file;save('readiq-selected',file.id);renderLibrary();const n=++token;verses=[];search.value='';title.textContent='Para-'+String(file.para).padStart(2,'0')+' · '+file.label;content.textContent='Opening quarter…';try{const r=await fetch(file.url,{cache:'no-store'});if(!r.ok)throw Error('Cannot open quarter');const data=await r.json();if(n!==token)return;verses=data.verses;render();document.getElementById('status').textContent=verses.length+' verses in this quarter'}catch(e){if(n===token)content.textContent=e.message}}
@@ -37,6 +37,31 @@ refresh();setInterval(refresh,30000);
 function cleanArabicEnd(text){
  return String(text).replace(
   /(?:[O\u25CB\u25EF\u25E6][\s\u200E\u200F\u061C]*)+$/u,
+  ''
+ ).trimEnd();
+}
+
+// READIQ_TRANSLATION_MARKERS_V2
+function cleanTranslationMarkers(text){
+ let result=String(text);
+
+ result=result.replace(
+  /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF)\]])[Oo](?=$|[\s\u200E\u200F\u061C\u2013\u2014])/gu,
+  '$1'
+ );
+
+ result=result.replace(
+  /(?:[\u25CB\u25EF\u25E6][\s\u200E\u200F\u061C]*)+$/u,
+  ''
+ );
+
+ result=result.replace(
+  /([.!?\u2026\u06D4)\]])[Oo]([\s\u200E\u200F\u061C]*)$/u,
+  '$1$2'
+ );
+
+ return result.replace(
+  /\s+[Oo][\s\u200E\u200F\u061C]*$/u,
   ''
  ).trimEnd();
 }

@@ -19,7 +19,7 @@ def main():
    cells=[engine.cell_text(c) for c in r.findall('w:tc',engine.NS)]
    if not any(cells) or ('code' in cells[1].lower() and 'translation' in cells[2].lower()):continue
    match=re.fullmatch(r'(P\d+[-–]S\d+[-–]\d+)\s*[–—-]\s*(.+)',cells[1],re.S)
-   pieces=re.split(r'\s+[–—]\s+',cells[2],maxsplit=1)
+   pieces=engine.split_translation(cells[2])
    v=rows[n];n+=1
    assert v==dict(code=match[1],ar=match[2].strip(),ur=pieces[0].strip(),en=pieces[1].strip())
   assert n==len(rows)

@@ -17,6 +17,33 @@ def cell_text(cell):
    elif el.tag=='{'+NS['w']+'}tab':parts.append('\t')
   paragraphs.append(''.join(parts))
  return '\n'.join(paragraphs).strip()
+
+# READIQ_TRANSLATION_SPLIT_V2
+def split_translation(text):
+    marks = list(re.finditer(r'\s+[\u2013\u2014]\s+', text))
+    if not marks:
+        raise ValueError('No translation separator found')
+
+    chosen = marks[0]
+
+    if len(marks) > 1:
+        candidates = []
+        for mark in marks:
+            right = text[mark.end():]
+            first = next((c for c in right if c.isalpha()), '')
+            if first and re.fullmatch(r'[A-Za-z]', first):
+                candidates.append(mark)
+
+        if not candidates:
+            raise ValueError('Cannot identify Urdu/English boundary')
+
+        chosen = candidates[0]
+
+    return [
+        text[:chosen.start()].strip(),
+        text[chosen.end():].strip()
+    ]
+
 def parse_docx(path):
  with zipfile.ZipFile(path) as z:root=ET.fromstring(z.read('word/document.xml'))
  records=[];seen=set()
@@ -27,7 +54,7 @@ def parse_docx(path):
    if len(cells)==3 and 'code' in cells[1].lower() and 'translation' in cells[2].lower():continue
    if len(cells)!=3:raise ValueError(f'{path.name}, row {rowno}: expected three columns')
    match=re.fullmatch(r'(P\d+[-–]S\d+[-–]\d+)\s*[–—-]\s*(.+)',cells[1],re.S)
-   trans=re.split(r'\s+[–—]\s+',cells[2],maxsplit=1)
+   trans=split_translation(cells[2])
    if not match or len(trans)!=2 or not all(t.strip() for t in trans):
     raise ValueError(f'{path.name}, row {rowno}: cannot separate code/Arabic/Urdu/English; review source row')
    code=match[1]
