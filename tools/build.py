@@ -120,6 +120,10 @@ def build():
  (stage/'library.json').write_text(json.dumps(catalogue,ensure_ascii=False),encoding='utf-8')
  shutil.copy2(ROOT/'interface.html',stage/'index.html')
  for name in ('app.js','favicon.svg','CNAME','.nojekyll'):shutil.copy2(ROOT/name,stage/name)
+ # READIQ_ABOUT_V1
+ about_page=ROOT/'about.html'
+ if not about_page.is_file():raise ValueError('Missing about.html')
+ shutil.copy2(about_page,stage/'about.html')
  if out.exists():shutil.rmtree(out)
  stage.rename(out)
  print(f'Built {len(items)} quarters / {catalogue["count"]} verses. All text comes from supplied Word files.',flush=True)
