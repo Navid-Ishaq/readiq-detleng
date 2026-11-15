@@ -216,6 +216,24 @@ header{justify-content:flex-start}.controls{margin-left:auto}.library-anchor{pos
 
 /* READIQ_ABOUT_V1 */
 .library-anchor .readiq-about-link{display:inline-flex;align-items:center;justify-content:center;order:99;text-decoration:none;font-size:14px;min-height:44px}.readiq-about-link:focus-visible{outline:3px solid #087ac8;outline-offset:3px}@media(max-width:760px){header .library-anchor .readiq-about-link{font-size:12px;padding:8px;min-height:40px}}
+/* READIQ_ABOUT_READER_V2 */
+.content.about-mode{font-size:var(--size);line-height:1.95;color:#18355d}
+.content.about-mode .language-document{margin:0;padding:0;border:0;background:transparent;box-shadow:none;max-width:none;border-radius:0}
+.content.about-mode h2{font:850 1.45em/1.45 system-ui,sans-serif;color:#116b9f;margin:1em 0}
+.content.about-mode h3{font-size:1.2em;line-height:1.6;color:#116b9f;margin:1.4em 0 .7em}
+.content.about-mode h4{font-size:1.08em;line-height:1.7;color:#116b9f;margin:1.2em 0 .6em}
+.content.about-mode p{margin:0 0 1.1em;overflow-wrap:anywhere}
+.content.about-mode .subtitle{font-size:1.25em;font-weight:800;font-style:italic;color:#116b9f;margin:1em 0}
+.content.about-mode .topic{padding-top:.4em}
+.content.about-mode .language-label{display:flex;align-items:center;justify-content:space-between;gap:15px;font:600 .5em/1.6 system-ui,sans-serif;color:#587392;margin-bottom:1em}
+.content.about-mode a{color:#087ac8;text-underline-offset:4px;overflow-wrap:anywhere}
+.content.about-mode .urdu-document{font-family:'Noto Naskh Arabic','Traditional Arabic',serif;text-align:right;line-height:2.05;border-top:1px solid #d4e9e3;margin-top:2em;padding-top:1.5em}
+.content.about-mode .urdu-document h2,.content.about-mode .urdu-document h3,.content.about-mode .urdu-document h4{font-family:'Noto Naskh Arabic','Traditional Arabic',serif;line-height:1.9}
+.content.about-mode .urdu-document .language-label{direction:ltr}
+.content.about-mode .url{font-family:system-ui,sans-serif;font-size:.8em}
+.content.about-mode .code{unicode-bidi:isolate;white-space:nowrap}
+.content.about-mode [id]{scroll-margin-top:calc(var(--read-header-height,100px) + 85px)}
+
 </style></head>
 <body><header><div class="brand"><div class="brand-logo">☀️</div><div><h1>IRFAN-UL-QURAN <span class="brand-reflect">· READ • REFLECT</span></h1><small>DeTLeng Read IQ</small></div></div><div class="library-anchor"><button class="file-toggle" id="fileToggle" aria-expanded="false" aria-controls="fileMenu">📚 Library <span id="fileMenuCount">(0)</span> ▾</button><!-- READIQ_ABOUT_V1 --><a class="file-toggle readiq-about-link" href="about.html">About</a></div>
 <button type="button" class="mobile-tools-toggle" id="mobileToolsButton" aria-label="Reading settings" aria-controls="readingTools" aria-expanded="false">⚙</button><div class="controls" id="readingTools"><span class="control-label">FONT SIZE</span><button class="size-btn" id="minus" title="Smaller text">−</button><input type="range" id="fontSlider" min="18" max="72" step="1" aria-label="Font size"><button class="size-btn" id="plus" title="Larger text">+</button><span class="font-chip" id="fontValue">31px</span><button class="action" id="reset">Reset</button><button class="action" id="fullscreen">⛶ Full screen</button></div></header>
