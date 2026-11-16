@@ -246,6 +246,28 @@ header{justify-content:flex-start}.controls{margin-left:auto}.library-anchor{pos
 @media (max-width: 760px) {
     .hero > strong { font-size: 22px; }
 }
+/* READIQ_ASMA_V1 */
+#asmaToggle{order:98;font-family:'Noto Naskh Arabic',serif;font-size:20px;line-height:1.4}
+#asmaMenu{overflow-x:hidden}
+#asmaMenu .language-picks{direction:ltr;text-align:left}
+#asmaMenu .language-picks label{display:flex;align-items:center;justify-content:flex-start;gap:10px;direction:ltr;text-align:left;width:100%;min-height:40px}
+.asma-options{padding:10px 12px 16px}
+.asma-option{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 15px;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:13px 14px;color:#18355d}
+.asma-option strong{font:700 23px/1.8 'Noto Naskh Arabic','Traditional Arabic',serif}
+.asma-option small{font-size:13px;color:#587392}
+.asma-option:hover,.asma-option.active{background:#e4f3ff}
+.content.asma-mode{font-size:var(--size);line-height:1.8}
+.content.asma-mode .asma-card{position:relative;isolation:isolate;display:grid;grid-template-columns:48px minmax(0,1fr) 48px;align-items:start;column-gap:12px;row-gap:8px;width:100%;padding:30px 24px 34px;margin:0 0 24px;border:1px solid #d6e6dc;border-radius:20px;background:linear-gradient(130deg,#ffffff,#f9fcf5);box-shadow:0 8px 25px #173f3808;color:#173f38}
+.content.asma-mode .asma-card:before{content:'';position:absolute;inset:8px;border:1px solid #e5ede3;border-radius:14px;pointer-events:none;z-index:-1}
+.content.asma-mode .asma-number{grid-column:1;grid-row:1;align-self:center;justify-self:start;display:grid;place-items:center;width:36px;height:36px;background:#f4efdf;border:1px solid #e9dfc7;border-radius:50%;font:600 14px/1 system-ui,sans-serif;color:#87631f;white-space:nowrap}
+.content.asma-mode .asma-card p{grid-column:2;min-width:0;margin:0;text-align:center;overflow-wrap:anywhere;white-space:pre-line}
+.content.asma-mode .asma-ar{font:700 1.5em/1.9 'Noto Naskh Arabic','Traditional Arabic',serif;color:#173f38;letter-spacing:0}
+.content.asma-mode .asma-pronunciation{font:500 .7em/1.8 system-ui,sans-serif;color:#8c6b2c;padding-bottom:7px}
+.content.asma-mode .asma-ur{font:400 1em/2.05 'Noto Naskh Arabic','Traditional Arabic',serif;color:#18355d}
+.content.asma-mode .asma-en{font:400 .75em/1.85 system-ui,sans-serif;color:#47665e}
+@media(max-width:760px){header .library-anchor #asmaToggle{font-size:17px;padding:7px 11px}.content.asma-mode .asma-card{grid-template-columns:30px minmax(0,1fr) 30px;column-gap:6px;padding:24px 14px 28px;border-radius:16px}.content.asma-mode .asma-number{width:29px;height:29px;font-size:12px}.content.asma-mode .asma-ar{font-size:1.35em}.content.asma-mode .asma-en{font-size:.72em}}
+@media print{#asmaToggle,#asmaMenu{display:none!important}.content.asma-mode .asma-card{break-inside:avoid;box-shadow:none;background:white}}
+
 </style></head>
 <body><header><div class="brand"><div class="brand-logo">☀️</div><div><h1>IRFAN-UL-QURAN <span class="brand-reflect">· READ • REFLECT</span></h1><small>DeTLeng Read IQ</small></div></div><div class="library-anchor"><button class="file-toggle" id="fileToggle" aria-expanded="false" aria-controls="fileMenu">📚 Library <span id="fileMenuCount">(0)</span> ▾</button><!-- READIQ_ABOUT_V1 --><a class="file-toggle readiq-about-link" href="about.html">About</a></div>
 <button type="button" class="mobile-tools-toggle" id="mobileToolsButton" aria-label="Reading settings" aria-controls="readingTools" aria-expanded="false">⚙</button><div class="controls" id="readingTools"><span class="control-label">FONT SIZE</span><button class="size-btn" id="minus" title="Smaller text">−</button><input type="range" id="fontSlider" min="18" max="72" step="1" aria-label="Font size"><button class="size-btn" id="plus" title="Larger text">+</button><span class="font-chip" id="fontValue">31px</span><button class="action" id="reset">Reset</button><button class="action" id="fullscreen">⛶ Full screen</button></div></header>
