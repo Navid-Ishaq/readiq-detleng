@@ -9,21 +9,31 @@ if(!anchor||!reader||document.getElementById('iqPracticeLaunch'))return;
 const button=document.createElement('button');button.type='button';button.id='iqPracticeLaunch';button.className='file-toggle';button.textContent='☷ Practice';button.title='MCQs and Flashcards for the opened Quarter, Para or Surah';anchor.append(button);
 let root=null,mounted=null,identity=null;
 function hide(){if(root)root.hidden=true;if(mounted)mounted.destroy();reader.hidden=false;document.documentElement.classList.remove('readiq-practice-open');button.setAttribute('aria-expanded','false')}
-window.ReadIQPractice={hide};button.setAttribute('aria-expanded','false');
+window.ReadIQPractice={hide,openContext};button.setAttribute('aria-expanded','false');
 function availability(){try{const snap=bridge.snapshot();button.disabled=!snap.rows.length;button.title='Practice '+snap.title}catch{button.disabled=true;button.title='Open a Quarter, Para or Surah to practise'}}
-button.onclick=()=>{
- try{
-  const context=bridge.snapshot(),id=JSON.stringify([context.revision,context.mode,context.sourceId,context.rows.map(v=>v.code)]);
-  if(!root||id!==identity){if(mounted)mounted.destroy();if(root)root.remove();const temp=document.createElement('div');temp.innerHTML=markup;root=temp.firstElementChild;reader.before(root);mounted=mountPractice(root,context);identity=id;}
-  root.hidden=false;reader.hidden=true;document.documentElement.classList.add('readiq-practice-open');button.setAttribute('aria-expanded','true');
-  document.querySelectorAll('.file-menu').forEach(m=>m.hidden=true);document.querySelectorAll('[aria-controls$="Menu"]').forEach(b=>b.setAttribute('aria-expanded','false'));
-  root.scrollIntoView({block:'start',behavior:'smooth'});
- }catch(e){window.alert(e.message)}
-};
+function openContext(context){
+ window.ReadIQWordByWord?.hide();
+ const id=JSON.stringify([context.revision,context.mode,context.sourceId,context.languages,context.rows.map(v=>v.id||v.code)]);
+ if(!root||id!==identity){if(mounted)mounted.destroy();if(root)root.remove();const temp=document.createElement('div');temp.innerHTML=markup;root=temp.firstElementChild;reader.before(root);mounted=mountPractice(root,context);identity=id;}
+ root.hidden=false;reader.hidden=true;document.documentElement.classList.add('readiq-practice-open');button.setAttribute('aria-expanded','true');
+ document.querySelectorAll('.file-menu').forEach(m=>m.hidden=true);document.querySelectorAll('[aria-controls$="Menu"]').forEach(b=>b.setAttribute('aria-expanded','false'));
+ root.scrollIntoView({block:'start',behavior:'smooth'});
+}
+button.onclick=()=>{try{openContext(bridge.snapshot())}catch(e){window.alert(e.message)}};
 new MutationObserver(availability).observe(document.getElementById('content'),{childList:true,subtree:true});availability();
 
 function mountPractice(root,context){
 const $=id=>root.querySelector('#'+id),data=context.rows;let available=[...data];
+const rowId=v=>v.id||v.code;
+if(context.mode==='word'){
+ root.classList.add('ip-word-mode');
+ const box=document.createElement('div');box.className='ip-word-context';
+ const label=document.createElement('small');label.textContent='Complete Ayat · Word in context';
+ const ar=document.createElement('p');ar.id='ip-word-context-ar';ar.className='ip-word-context-ar';ar.lang='ar';ar.dir='rtl';box.append(label,ar);
+ $('ip-card').insertBefore(box,$('ip-verse'));
+ $('ip-verse').setAttribute('aria-label','Flip this word to its meaning');
+} 
+
 $('ip-scope-label').textContent=context.title;
 const sessions=new Map();let scope='current',size=10,start=1,end=data.length,langs=context.languages.length?[...context.languages]:['ur','en'],kind='mcq',mode='learn',selectedGroup='all',attempt=null,index=0,flipped=false,pendingAction=null,fontSize=28;
 const titles={current:context.title};
@@ -31,27 +41,27 @@ const shuffle=items=>{const a=[...items];for(let i=a.length-1;i>0;i--){const j=M
 function pool(){return data}
 function groups(){const max=pool().length,lo=Math.max(1,Math.min(max,start)),hi=Math.max(lo,Math.min(max,end)),arr=[{id:'all',from:lo,to:hi}];for(let n=lo,g=1;n<=hi;n+=size,g++)arr.push({id:String(g),from:n,to:Math.min(hi,n+size-1)});return arr}
 function key(group=selectedGroup){return [scope,size,start,end,langs.join(','),kind,mode,group].join('|')}
-function makeOptions(v){const signature=x=>langs.map(l=>x[l].normalize('NFC').replace(/\s+/g,' ').trim()).join('\u0001');const seen=new Set([signature(v)]);const wrong=[];for(const other of shuffle(available)){const sig=signature(other);if(other.code!==v.code&&!seen.has(sig)){seen.add(sig);wrong.push(other);if(wrong.length===2)break}}if(wrong.length!==2)throw Error('Not enough distinct translations');return shuffle([v,...wrong])}
-function fresh(){const group=groups().find(g=>g.id===selectedGroup)||groups()[0];selectedGroup=group.id;let rows=pool().slice(group.from-1,group.to).map((v,i)=>({v,number:group.from+i,options:makeOptions(v),answer:null,seen:false}));if($('ip-order').checked)rows=shuffle(rows);attempt={rows,done:false};sessions.set(key(),attempt);index=0;flipped=false;render()}
+function makeOptions(v){const signature=x=>langs.map(l=>x[l].normalize('NFC').replace(/\s+/g,' ').trim()).join('\u0001');const seen=new Set([signature(v)]);const wrong=[];for(const other of shuffle(available)){const sig=signature(other);if(rowId(other)!==rowId(v)&&!seen.has(sig)){seen.add(sig);wrong.push(other);if(wrong.length===2)break}}if(wrong.length!==2)throw Error('Not enough distinct translations');return shuffle([v,...wrong])}
+function fresh(){const group=groups().find(g=>g.id===selectedGroup)||groups()[0];selectedGroup=group.id;let rows=pool().slice(group.from-1,group.to).map((v,i)=>({v,number:group.from+i,options:kind==='mcq'?makeOptions(v):[],answer:null,seen:false}));if($('ip-order').checked)rows=shuffle(rows);attempt={rows,done:false};sessions.set(key(),attempt);index=0;flipped=false;render()}
 function openGroup(){attempt=sessions.get(key());if(!attempt)fresh();else{index=0;flipped=false;render()}$('ip-groups').hidden=true;$('ip-play').hidden=false}
 function translation(node,v){for(const l of ['ur','en'])if(langs.includes(l)){const p=document.createElement('p');p.className='ip-'+l;p.lang=l;p.dir=l==='ur'?'rtl':'ltr';p.textContent=v[l];node.append(p)}}
-function correctness(q){return q.answer===null?false:q.options[q.answer].code===q.v.code}
+function correctness(q){return q.answer===null?false:rowId(q.options[q.answer])===rowId(q.v)}
 function resultState(a){if(!a)return'';if(a.done)return a.rows.every(correctness)?'ip-good':'ip-bad';if(mode==='learn'&&kind==='mcq'&&a.rows.every(q=>q.answer!==null))return a.rows.every(correctness)?'ip-good':'ip-bad';return a.rows.some(q=>q.answer!==null||q.seen)?'ip-progress':''}
 function renderGroups(){const max=pool().length;$('ip-start-range').max=max;$('ip-end-range').max=max;$('ip-start-range').value=start;$('ip-end-range').value=end;const box=$('ip-group-buttons');box.replaceChildren();for(const g of groups()){const b=document.createElement('button');b.type='button';b.className=resultState(sessions.get(key(g.id)));b.setAttribute('aria-pressed',String(g.id===selectedGroup));if(g.id===selectedGroup)b.style.outline='2px solid var(--ip-accent)';const name=document.createElement('strong');name.textContent=g.id==='all'?'All questions':'Group '+g.id;const small=document.createElement('small');small.textContent=g.from+'–'+g.to+' · '+(g.to-g.from+1)+' questions';b.append(name,small);b.onclick=()=>{selectedGroup=g.id;renderGroups()};box.append(b)}}
 function back(){if($('ip-result').open)$('ip-result').close();$('ip-play').hidden=true;$('ip-groups').hidden=false;renderGroups()}
 function choose(n){const q=attempt.rows[index];if(attempt.done||kind!=='mcq'||mode==='learn'&&q.answer!==null)return;q.answer=n;render()}
 function flip(){if(kind==='mcq'&&mode==='test'&&!attempt.done)return;flipped=!flipped;attempt.rows[index].seen=true;render()}
 function render(){const q=attempt.rows[index],feedback=mode==='learn'||attempt.done,answered=attempt.rows.filter(x=>x.answer!==null).length;
-$('ip-title').textContent=titles[scope];$('ip-position').textContent=(index+1)+' / '+attempt.rows.length;$('ip-qnumber').textContent='Question '+String(q.number).padStart(2,'0');$('ip-arabic').textContent=q.v.ar;$('ip-code').textContent=q.v.code;
+$('ip-title').textContent=titles[scope];$('ip-position').textContent=(index+1)+' / '+attempt.rows.length;$('ip-qnumber').textContent='Question '+String(q.number).padStart(2,'0');$('ip-arabic').textContent=q.v.ar;$('ip-code').textContent=q.v.code+(context.mode==='word'?' · Word '+q.v.serial:'');if(context.mode==='word')$('ip-word-context-ar').textContent=q.v.fullAr;
 $('ip-mcq').setAttribute('aria-pressed',String(kind==='mcq'));$('ip-flash').setAttribute('aria-pressed',String(kind==='flash'));$('ip-learn').setAttribute('aria-pressed',String(mode==='learn'));$('ip-test').setAttribute('aria-pressed',String(mode==='test'));$('ip-mode-row').hidden=kind==='flash';
 $('ip-state').textContent=kind==='flash'?'Classic Flashcards · Think, then flip to reveal':attempt.done?'Test complete · '+attempt.rows.filter(correctness).length+'/'+attempt.rows.length+' correct':mode==='learn'?'Learning Mode · Instant feedback · First answer locks':'Test Mode · '+answered+'/'+attempt.rows.length+' answered';
 $('ip-finish').hidden=kind!=='mcq'||mode!=='test';$('ip-finish').textContent=attempt.done?'View result':'Finish Test';
 $('ip-side').textContent=flipped?'Answer side':'Question side';$('ip-card').classList.toggle('ip-answer-side',flipped);const area=$('ip-answer-area');area.replaceChildren();
 if(flipped){const answer=document.createElement('div');answer.className='ip-answer-box';const tick=document.createElement('div');tick.className='ip-tick';tick.textContent='✓';const label=document.createElement('p');label.className='ip-eyebrow';label.textContent='Correct answer';answer.append(tick,label);translation(answer,q.v);area.append(answer)}
-else if(kind==='mcq'){const options=document.createElement('div');options.className='ip-options';q.options.forEach((v,n)=>{const b=document.createElement('button');b.type='button';b.className='ip-option';b.setAttribute('aria-pressed',String(q.answer===n));if(feedback&&(q.answer!==null||attempt.done)){if(v.code===q.v.code)b.classList.add('ip-correct');else if(q.answer===n)b.classList.add('ip-wrong')}b.disabled=attempt.done||mode==='learn'&&q.answer!==null;const letter=document.createElement('span');letter.className='ip-letter';letter.textContent='ABC'[n];const body=document.createElement('div');body.className='ip-option-body';translation(body,v);b.append(letter,body);b.onclick=()=>choose(n);options.append(b)});area.append(options)}
+else if(kind==='mcq'){const options=document.createElement('div');options.className='ip-options';q.options.forEach((v,n)=>{const b=document.createElement('button');b.type='button';b.className='ip-option';b.setAttribute('aria-pressed',String(q.answer===n));if(feedback&&(q.answer!==null||attempt.done)){if(rowId(v)===rowId(q.v))b.classList.add('ip-correct');else if(q.answer===n)b.classList.add('ip-wrong')}b.disabled=attempt.done||mode==='learn'&&q.answer!==null;const letter=document.createElement('span');letter.className='ip-letter';letter.textContent='ABC'[n];const body=document.createElement('div');body.className='ip-option-body';translation(body,v);b.append(letter,body);b.onclick=()=>choose(n);options.append(b)});area.append(options)}
 else{const text=document.createElement('p');text.className='ip-hint';text.textContent='Think of the meaning, then flip the card.';area.append(text)}
 $('ip-feedback').textContent=kind==='mcq'&&feedback&&q.answer!==null?(correctness(q)?'✓ Correct answer. Keep going.':'✕ Needs practice. The correct answer is highlighted in green.') :kind==='mcq'&&mode==='test'&&!attempt.done?'Your choice is saved for this attempt. Answers appear after Finish Test.':'';
-const flipAllowed=kind==='flash'||mode==='learn'||attempt.done;$('ip-flip').disabled=!flipAllowed;$('ip-verse').disabled=!flipAllowed;$('ip-hint').textContent=flipAllowed?'Click the Ayat or Flip card to turn the card.':'Test Mode · Answer side is locked until you finish.';
+const flipAllowed=kind==='flash'||mode==='learn'||attempt.done;$('ip-flip').disabled=!flipAllowed;$('ip-verse').disabled=!flipAllowed;$('ip-hint').textContent=flipAllowed?'Click the Arabic or Flip card to turn the card.':'Test Mode · Answer side is locked until you finish.';
 $('ip-prev').disabled=index===0;$('ip-next').disabled=index===attempt.rows.length-1&&(kind==='flash'||attempt.done);$('ip-next').textContent=index===attempt.rows.length-1?(kind==='flash'?'Last card ✓':attempt.done?'Last question ✓':mode==='test'?'Finish Test ✓':'View result ✓'):'Next →';
 $('ip-shuffle-options').disabled=kind==='flash'||attempt.done||attempt.rows.some(x=>x.answer!==null);$('ip-shuffle-questions').disabled=attempt.done||attempt.rows.some(x=>x.answer!==null);
 const numbers=$('ip-numbers');numbers.replaceChildren();attempt.rows.forEach((row,i)=>{const b=document.createElement('button');b.textContent=row.number;b.setAttribute('aria-current',String(i===index));let status='Unanswered';if(kind==='mcq'&&(mode==='learn'||attempt.done)&&(row.answer!==null||attempt.done)){b.className=correctness(row)?'ip-good':'ip-bad';status=correctness(row)?'Correct':'Needs practice'}else if(row.answer!==null||row.seen){b.className='ip-progress';status=row.answer!==null?'Answered':'Viewed'}b.setAttribute('aria-label','Question '+row.number+' · '+status);b.onclick=()=>{index=i;flipped=false;render()};numbers.append(b)});
@@ -61,7 +71,7 @@ function showResult(){if(kind==='flash')return;const total=attempt.rows.length,c
 $('ip-result-title').textContent=perfect?'Outstanding!':'Keep going—you’re making progress.';$('ip-score').textContent=correct+'/'+total;$('ip-percent').textContent=Math.round(100*correct/total)+'% correct';$('ip-counts').textContent=correct+' correct · '+(total-correct)+' to review'+(missing?' · '+missing+' unanswered':'');$('ip-motivation').textContent=perfect?'You’ve mastered this set. Carry that confidence into your next challenge.':'Take your time, review the answers, and try again. Every attempt builds understanding.';$('ip-result').showModal()}
 function confirmAction(title,text,action,button='Restart attempt'){pendingAction=action;$('ip-confirm-title').textContent=title;$('ip-confirm-text').textContent=text;$('ip-confirm-yes').textContent=button;$('ip-confirm').showModal()}
 function finish(){if(attempt.done){showResult();return}const missing=attempt.rows.filter(q=>q.answer===null).length;const complete=()=>{attempt.done=true;flipped=false;render();showResult()};if(missing)confirmAction('Finish this test?',missing+' unanswered question(s) will count as incorrect. Results will then be revealed.',complete,'Finish Test');else complete()}
-function switchSetting(field,value){if(field==='kind'&&kind===value||field==='mode'&&mode===value)return;const action=()=>{if(field==='kind')kind=value;else mode=value;fresh()};if(attempt.rows.some(q=>q.answer!==null||q.seen)&&!attempt.done)confirmAction('Start a fresh attempt?','Changing mode clears the current attempt in the selected group.',action,'Change mode');else action()}
+function switchSetting(field,value){if(field==='kind'&&kind===value||field==='mode'&&mode===value)return;const action=()=>{const oldKind=kind,oldMode=mode;try{if(field==='kind')kind=value;else mode=value;fresh()}catch(e){kind=oldKind;mode=oldMode;$('ip-feedback').textContent=e.message}};if(attempt.rows.some(q=>q.answer!==null||q.seen)&&!attempt.done)confirmAction('Start a fresh attempt?','Changing mode clears the current attempt in the selected group.',action,'Change mode');else action()}
 $('ip-back').onclick=back;$('ip-restart').onclick=()=>confirmAction('Restart this attempt?','Your current answers will be cleared and options will be reshuffled. This cannot be undone.',fresh);
 $('ip-mcq').onclick=()=>switchSetting('kind','mcq');$('ip-flash').onclick=()=>switchSetting('kind','flash');$('ip-learn').onclick=()=>switchSetting('mode','learn');$('ip-test').onclick=()=>switchSetting('mode','test');
 $('ip-verse').onclick=flip;$('ip-flip').onclick=flip;$('ip-prev').onclick=()=>{if(index>0){index--;flipped=false;render()}};$('ip-next').onclick=()=>{if(index<attempt.rows.length-1){index++;flipped=false;render()}else if(kind==='mcq'){if(mode==='test')finish();else showResult()}};
@@ -77,8 +87,8 @@ $('ip-urdu').onchange=languageChange;$('ip-english').onchange=languageChange;$('
  const button=$('ip-generate');button.disabled=true;button.textContent='Preparing questions…';$('ip-validation').textContent='';
  try{
   const signature=x=>langs.map(l=>x[l].normalize('NFC').replace(/\s+/g,' ').trim()).join('\u0001');
-  available=[...data];if(new Set(available.map(signature)).size<3)available.push(...await context.extraPool(langs));
-  if(new Set(available.map(signature)).size<3)throw Error('Three distinct translations are needed for MCQ options.');
+  available=[...data];if(kind==='mcq'&&new Set(available.map(signature)).size<3)available.push(...await context.extraPool(langs));
+  if(kind==='mcq'&&new Set(available.map(signature)).size<3)throw Error('Three distinct translations are needed for MCQ options.');
   openGroup();
  }catch(e){$('ip-validation').textContent=e.message}
  finally{button.disabled=!langs.length;button.textContent='Start selected group →'}
@@ -86,7 +96,7 @@ $('ip-urdu').onchange=languageChange;$('ip-english').onchange=languageChange;$('
 function setSize(n){fontSize=Math.max(22,Math.min(40,n));root.style.setProperty('--ip-size',fontSize+'px');$('ip-fontsize').value=fontSize;$('ip-fontvalue').textContent=fontSize+'px'}$('ip-smaller').onclick=()=>setSize(fontSize-2);$('ip-larger').onclick=()=>setSize(fontSize+2);$('ip-reset-font').onclick=()=>setSize(28);$('ip-fontsize').oninput=()=>setSize(Number($('ip-fontsize').value));
 root.addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===$('ip-verse')){e.preventDefault();flip()}});
 $('ip-urdu').checked=langs.includes('ur');$('ip-english').checked=langs.includes('en');
-$('ip-exit').onclick=()=>window.ReadIQPractice.hide();
+$('ip-exit').onclick=()=>{window.ReadIQPractice.hide();if(context.onExit)context.onExit()};
 $('ip-groups').hidden=false;$('ip-play').hidden=true;renderGroups();
 root.hidden=false;
 return {destroy(){for(const d of root.querySelectorAll('dialog[open]'))d.close()}};

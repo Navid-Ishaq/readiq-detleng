@@ -116,6 +116,14 @@ def build():
  stage=ROOT/'_site-next';out=ROOT/'_site'
  if stage.exists():shutil.rmtree(stage)
  (stage/'documents').mkdir(parents=True)
+ # READIQ_WORD_BUILD_V1
+ import runpy
+ runpy.run_path(str(ROOT/'tools'/'wbw_build.py'))['build_word_by_word'](ROOT,stage,catalogue,payloads)
+ for word_asset in ('word-by-word.js','word-by-word.css'):
+  if not (ROOT/word_asset).is_file():raise ValueError('Missing '+word_asset)
+  shutil.copy2(ROOT/word_asset,stage/word_asset)
+ # READIQ_WORD_BUILD_END
+
  for url,payload in payloads.items():(stage/url).write_text(json.dumps(payload,ensure_ascii=False),encoding='utf-8')
  (stage/'library.json').write_text(json.dumps(catalogue,ensure_ascii=False),encoding='utf-8')
  shutil.copy2(ROOT/'interface.html',stage/'index.html')
