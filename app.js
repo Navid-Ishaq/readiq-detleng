@@ -21,7 +21,7 @@ if(!verses.length){const p=document.createElement('p');p.className='empty';p.tex
 for(const v of verses){const section=document.createElement('section');section.className='verse';section.setAttribute('aria-label',v.code);const code=document.createElement('div');code.className='verse-code';code.dir='ltr';code.textContent=v.code;section.append(code);for(const k of ['ar','ur','en']){if(!langs.includes(k))continue;const p=document.createElement('p');p.className='verse-'+k;p.lang=k;p.dir=k==='en'?'ltr':'rtl';p.textContent=k==='ar'?cleanArabicEnd(v[k]):cleanTranslationMarkers(v[k]);section.append(p)}content.append(section)}highlight();}
 function highlight(){content.querySelectorAll('mark').forEach(m=>m.replaceWith(document.createTextNode(m.textContent)));content.normalize();const term=search.value.trim();if(!term)return;const walker=document.createTreeWalker(content,NodeFilter.SHOW_TEXT),nodes=[];let node;while(node=walker.nextNode())if(node.nodeValue.toLowerCase().includes(term.toLowerCase()))nodes.push(node);for(const n of nodes){const raw=n.nodeValue,frag=document.createDocumentFragment();let pos=0,at;while((at=raw.toLowerCase().indexOf(term.toLowerCase(),pos))!==-1){frag.append(document.createTextNode(raw.slice(pos,at)));const m=document.createElement('mark');m.className='match';m.textContent=raw.slice(at,at+term.length);frag.append(m);pos=at+term.length}frag.append(document.createTextNode(raw.slice(pos)));n.replaceWith(frag)}}
 checks.forEach(c=>c.onchange=()=>{save('readiq-languages',selectedLanguages());render()});search.oninput=()=>{highlight();content.querySelector('mark')?.scrollIntoView({block:'center',behavior:'smooth'})};
-async function openFile(file){clearAsmaHash();readingMode='quarter';save('readiq-mode','quarter');selected=file;save('readiq-selected',file.id);renderLibrary();renderParasMenu();renderSurahsMenu();const n=++token;verses=[];search.value='';title.textContent='Para-'+String(file.para).padStart(2,'0')+' · '+file.label;content.textContent='Opening quarter…';try{const r=await fetch(file.url,{cache:'no-store'});if(!r.ok)throw Error('Cannot open quarter');const data=await r.json();if(n!==token)return;verses=data.verses;render();document.getElementById('status').textContent=verses.length+' verses in this quarter'}catch(e){if(n===token)content.textContent=e.message}}
+async function openFile(file){window.ReadIQPractice?.hide();clearAsmaHash();readingMode='quarter';save('readiq-mode','quarter');selected=file;save('readiq-selected',file.id);renderLibrary();renderParasMenu();renderSurahsMenu();const n=++token;verses=[];search.value='';title.textContent='Para-'+String(file.para).padStart(2,'0')+' · '+file.label;content.textContent='Opening quarter…';try{const r=await fetch(file.url,{cache:'no-store'});if(!r.ok)throw Error('Cannot open quarter');const data=await r.json();if(n!==token)return;verses=data.verses;render();document.getElementById('status').textContent=verses.length+' verses in this quarter'}catch(e){if(n===token)content.textContent=e.message}}
 async function refresh(){if(polling)return;polling=true;try{const r=await fetch('library.json',{cache:'no-store'});if(!r.ok)throw Error('Library unavailable');const next=await r.json();if(next.revision===revision)return;catalogue=next;revision=next.revision;renderLibrary();renderParasMenu();renderSurahsMenu();const id=selected?.id||saved('readiq-selected',null),chosen=catalogue.files.find(f=>f.id===id)||catalogue.files[0];if(readingMode==='asma')openAsma(asmaKind);else if(readingMode==='about')await openAbout();else if(readingMode==='surah')await openSurah(currentSurah);else if(readingMode==='para')await openPara(currentPara);else if(chosen)await openFile(chosen);else{selected=null;verses=[];++token;title.textContent='Irfan-ul-Quran';render();document.getElementById('status').textContent='Add quarter files to begin'}}catch{document.getElementById('status').textContent='Library unavailable. Please refresh.'}finally{polling=false}}
 let font=Number(saved('readiq-font',31));if(!Number.isFinite(font))font=31;
 function setFont(v){font=Math.max(18,Math.min(72,Number(v)));document.documentElement.style.setProperty('--size',font+'px');slider.value=font;fontValue.textContent=font+'px';save('readiq-font',font)}
@@ -50,7 +50,7 @@ document.addEventListener('pointerdown',e=>{if(!paraMenu.contains(e.target)&&!pa
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!paraMenu.hidden){showParaMenu(false);paraToggle.focus()}});
 window.addEventListener('resize',positionParas);new ResizeObserver(positionParas).observe(header);
 function renderParasMenu(){paraList.replaceChildren();paraNames.forEach(([arabic,roman],i)=>{const para=i+1;const complete=[1,2,3,4].every(q=>catalogue.files.some(f=>f.para===para&&f.quarter===q));const b=document.createElement('button');b.type='button';b.className='para-option'+(readingMode==='para'&&currentPara===para?' active':'');b.disabled=!complete;const top=document.createElement('span');top.className='para-option-title';const num=document.createElement('span');num.textContent=String(para).padStart(2,'0')+' · ';const ar=document.createElement('span');ar.lang='ar';ar.dir='rtl';ar.textContent=arabic;top.append(num,ar);const bottom=document.createElement('small');bottom.textContent=roman;b.append(top,bottom);if(!complete)b.title='All four quarter files are required';b.onclick=()=>{showParaMenu(false);openPara(para);window.scrollTo({top:0,behavior:'smooth'})};paraList.append(b)})}
-async function openPara(para){clearAsmaHash();
+async function openPara(para){window.ReadIQPractice?.hide();clearAsmaHash();
  const n=++token;readingMode='para';currentPara=para;selected={para,id:'para-'+para};save('readiq-mode','para');save('readiq-para',para);renderLibrary();renderParasMenu();renderSurahsMenu();verses=[];search.value='';title.textContent='Para-'+String(para).padStart(2,'0')+' · '+(paraNames[para-1]?.[0]||'')+' · Complete Para';content.textContent='Opening all four quarters…';document.getElementById('fileCount').textContent='0 VERSES';
  try{
   const files=[1,2,3,4].map(q=>catalogue.files.find(f=>f.para===para&&f.quarter===q));if(files.some(f=>!f))throw Error('This Para needs all four quarter files.');
@@ -77,7 +77,7 @@ document.addEventListener('pointerdown',e=>{if(!surahMenu.contains(e.target)&&!s
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!surahMenu.hidden){showSurahMenu(false);surahToggle.focus()}});
 window.addEventListener('resize',positionSurahs);new ResizeObserver(positionSurahs).observe(header);
 function renderSurahsMenu(){surahList.replaceChildren();surahNames.forEach(([roman,urdu],i)=>{const number=i+1,entry=catalogue.surahs?.find(s=>s.number===number);const b=document.createElement('button');b.type='button';b.className='surah-option'+(readingMode==='surah'&&currentSurah===number?' active':'');b.disabled=!entry?.complete;const top=document.createElement('span');top.className='surah-option-title';top.textContent=String(number).padStart(3,'0')+' · '+roman;const bottom=document.createElement('small');bottom.lang='ur';bottom.dir='rtl';bottom.textContent=urdu;b.append(top,bottom);if(!entry?.complete){b.title=entry?entry.count+' of '+entry.expected+' verses available':'Surah index not built yet';b.setAttribute('aria-label',number+' '+roman+' — incomplete source content')}b.onclick=()=>{showSurahMenu(false);openSurah(number);window.scrollTo({top:0,behavior:'smooth'})};surahList.append(b)})}
-async function openSurah(number){clearAsmaHash();
+async function openSurah(number){window.ReadIQPractice?.hide();clearAsmaHash();
  const n=++token;readingMode='surah';currentSurah=number;selected={id:'surah-'+number};save('readiq-mode','surah');save('readiq-surah',number);renderLibrary();renderParasMenu();renderSurahsMenu();verses=[];search.value='';title.textContent='Surah '+number+' · '+(surahNames[number-1]?.[0]||'');content.textContent='Opening complete Surah…';document.getElementById('fileCount').textContent='0 VERSES';
  try{
   const entry=catalogue.surahs?.find(s=>s.number===number);if(!entry?.complete||!entry.url)throw Error('Complete Surah content is not available. Please review the source files.');
@@ -100,7 +100,7 @@ function renderAbout(){content.classList.remove('asma-mode');
  document.getElementById('status').textContent='About Read IQ';
  highlight();
 }
-async function openAbout(){
+async function openAbout(){window.ReadIQPractice?.hide();
  const request=++token;readingMode='about';search.value='';
  setFileMenu(false);showParaMenu(false);showSurahMenu(false);tools(false);
  title.textContent='About Irfan-ul-Quran Read IQ';content.textContent='Opening About…';
@@ -153,9 +153,33 @@ function renderAsma(){
  for(const k of ['ar','pronunciation','ur','en']){if(!asmaChoice.includes(k))continue;const p=document.createElement('p');p.className='asma-'+k;p.lang=k==='ar'?'ar':k==='ur'?'ur':'en';p.dir=(k==='ar'||k==='ur')?'rtl':'ltr';p.textContent=name[k];p.style.gridRow=String(row++);card.append(p)}
  list.append(card)});content.append(list);highlight();
 }
-function openAsma(kind){if(!['allah','nabi'].includes(kind))return;++token;readingMode='asma';asmaKind=kind;verses=[];selected={id:'asma-'+kind};search.value='';save('readiq-mode','asma');save('readiq-asma-kind',kind);history.replaceState(null,'','#asma-'+kind);setFileMenu(false);showParaMenu(false);showSurahMenu(false);showAsmaMenu(false);tools(false);renderLibrary();renderParasMenu();renderSurahsMenu();renderAsma()}
+function openAsma(kind){window.ReadIQPractice?.hide();if(!['allah','nabi'].includes(kind))return;++token;readingMode='asma';asmaKind=kind;verses=[];selected={id:'asma-'+kind};search.value='';save('readiq-mode','asma');save('readiq-asma-kind',kind);history.replaceState(null,'','#asma-'+kind);setFileMenu(false);showParaMenu(false);showSurahMenu(false);showAsmaMenu(false);tools(false);renderLibrary();renderParasMenu();renderSurahsMenu();renderAsma()}
 window.addEventListener('hashchange',()=>{const m=/^#asma-(allah|nabi)$/.exec(location.hash);if(m)openAsma(m[1])});
 const asmaHash=/^#asma-(allah|nabi)$/.exec(location.hash);if(asmaHash){readingMode='asma';asmaKind=asmaHash[1]}
+
+// READIQ_PRACTICE_BRIDGE_V1
+window.ReadIQPracticeBridge={
+ snapshot(){
+  if(!['quarter','para','surah'].includes(readingMode)||!Array.isArray(verses)||!verses.length)throw Error('Open a Quarter, Para or Surah and wait for its verses to load first.');
+  const clean=v=>({code:String(v.code),ar:cleanArabicEnd(v.ar),ur:cleanTranslationMarkers(v.ur),en:cleanTranslationMarkers(v.en)});
+  const rows=verses.map(clean);
+  if(rows.some(v=>!v.code||!v.ar||!v.ur||!v.en))throw Error('Some verse fields are missing. Practice cannot start with incomplete content.');
+  return {title:title.textContent,mode:readingMode,rows,languages:selectedLanguages().filter(k=>k==='ur'||k==='en'),revision,sourceId:selected?.id||title.textContent,
+   async extraPool(languages){
+    const extras=[],seen=new Set(rows.map(v=>languages.map(l=>v[l].normalize('NFC').replace(/\s+/g,' ').trim()).join('\u0001')));
+    const files=[...catalogue.files];for(let i=files.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[files[i],files[j]]=[files[j],files[i]]}
+    for(const file of files){
+     if(seen.size>=3)break;
+     const response=await fetch(file.url,{cache:'no-store'});if(!response.ok)continue;const payload=await response.json();if(!Array.isArray(payload.verses))continue;
+     for(const raw of payload.verses){const v=clean(raw);if(!v.code||!v.ar||!v.ur||!v.en)continue;extras.push(v);seen.add(languages.map(l=>v[l].normalize('NFC').replace(/\s+/g,' ').trim()).join('\u0001'))}
+    }
+    return extras;
+   }
+  };
+ }
+};
+
+// READIQ_PRACTICE_BRIDGE_END
 
 refresh();setInterval(refresh,30000);
 

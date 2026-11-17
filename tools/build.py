@@ -129,6 +129,10 @@ def build():
  if not font_source.is_file():raise ValueError('Missing fonts/almushaf-org.ttf')
  (stage/'fonts').mkdir(exist_ok=True)
  shutil.copy2(font_source,stage/'fonts'/'almushaf-org.ttf')
+ # READIQ_PRACTICE_BUILD_V1
+ for practice_asset in ('practice.js','practice.css'):
+  if not (ROOT/practice_asset).is_file():raise ValueError('Missing '+practice_asset)
+  shutil.copy2(ROOT/practice_asset,stage/practice_asset)
  if out.exists():shutil.rmtree(out)
  stage.rename(out)
  print(f'Built {len(items)} quarters / {catalogue["count"]} verses. All text comes from supplied Word files.',flush=True)
