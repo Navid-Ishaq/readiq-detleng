@@ -27,9 +27,13 @@ const $=id=>root.querySelector('#'+id),data=context.rows;let available=[...data]
 const rowId=v=>v.id||v.code;
 if(context.mode==='word'){
  root.classList.add('ip-word-mode');
- const box=document.createElement('div');box.className='ip-word-context';
+ const picks=document.createElement('fieldset');picks.className='ip-full-options';
+ const legend=document.createElement('legend');legend.textContent='Complete Ayat above the word';picks.append(legend);
+ for(const [key,name] of [['ar','Arabic'],['ur','Urdu'],['en','English']]){const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.id='ip-full-'+key;check.checked=key==='ar';label.append(check,' '+name);picks.append(label);check.onchange=()=>{render()}}
+ $('ip-card').insertBefore(picks,$('ip-verse'));
+ const box=document.createElement('div');box.id='ip-full-context';box.className='ip-word-context';
  const label=document.createElement('small');label.textContent='Complete Ayat · Word in context';
- const ar=document.createElement('p');ar.id='ip-word-context-ar';ar.className='ip-word-context-ar';ar.lang='ar';ar.dir='rtl';box.append(label,ar);
+ const ar=document.createElement('p');ar.id='ip-word-context-ar';ar.className='ip-word-context-ar';ar.lang='ar';ar.dir='rtl';box.append(label,ar);for(const [key,lang,dir] of [['ur','ur','rtl'],['en','en','ltr']]){const p=document.createElement('p');p.id='ip-word-context-'+key;p.className='ip-full-'+key;p.lang=lang;p.dir=dir;box.append(p)}
  $('ip-card').insertBefore(box,$('ip-verse'));
  $('ip-verse').setAttribute('aria-label','Flip this word to its meaning');
 } 
@@ -52,7 +56,7 @@ function back(){if($('ip-result').open)$('ip-result').close();$('ip-play').hidde
 function choose(n){const q=attempt.rows[index];if(attempt.done||kind!=='mcq'||mode==='learn'&&q.answer!==null)return;q.answer=n;render()}
 function flip(){if(kind==='mcq'&&mode==='test'&&!attempt.done)return;flipped=!flipped;attempt.rows[index].seen=true;render()}
 function render(){const q=attempt.rows[index],feedback=mode==='learn'||attempt.done,answered=attempt.rows.filter(x=>x.answer!==null).length;
-$('ip-title').textContent=titles[scope];$('ip-position').textContent=(index+1)+' / '+attempt.rows.length;$('ip-qnumber').textContent='Question '+String(q.number).padStart(2,'0');$('ip-arabic').textContent=q.v.ar;$('ip-code').textContent=q.v.code+(context.mode==='word'?' · Word '+q.v.serial:'');if(context.mode==='word')$('ip-word-context-ar').textContent=q.v.fullAr;
+$('ip-title').textContent=titles[scope];$('ip-position').textContent=(index+1)+' / '+attempt.rows.length;$('ip-qnumber').textContent='Question '+String(q.number).padStart(2,'0');$('ip-arabic').textContent=q.v.ar;$('ip-code').textContent=q.v.code+(context.mode==='word'?' · Word '+q.v.serial:'');if(context.mode==='word'){for(const [key,field] of [['ar','fullAr'],['ur','fullUr'],['en','fullEn']]){const node=$('ip-word-context-'+key);node.textContent=q.v[field]||'';node.hidden=!$('ip-full-'+key).checked}$('ip-full-context').hidden=!['ar','ur','en'].some(key=>$('ip-full-'+key).checked)}
 $('ip-mcq').setAttribute('aria-pressed',String(kind==='mcq'));$('ip-flash').setAttribute('aria-pressed',String(kind==='flash'));$('ip-learn').setAttribute('aria-pressed',String(mode==='learn'));$('ip-test').setAttribute('aria-pressed',String(mode==='test'));$('ip-mode-row').hidden=kind==='flash';
 $('ip-state').textContent=kind==='flash'?'Classic Flashcards · Think, then flip to reveal':attempt.done?'Test complete · '+attempt.rows.filter(correctness).length+'/'+attempt.rows.length+' correct':mode==='learn'?'Learning Mode · Instant feedback · First answer locks':'Test Mode · '+answered+'/'+attempt.rows.length+' answered';
 $('ip-finish').hidden=kind!=='mcq'||mode!=='test';$('ip-finish').textContent=attempt.done?'View result':'Finish Test';

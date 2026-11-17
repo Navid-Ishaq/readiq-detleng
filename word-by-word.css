@@ -28,3 +28,16 @@ html.readiq-wbw-open header .controls,html.readiq-wbw-open #mobileToolsButton{di
  opacity:.65;
 }
 /* READIQ_WORD_VERSE_CIRCLE_END */
+
+/* READIQ_COMPLETE_AYAT_LANGUAGES_V1 */
+#readiq-wbw .wb-full-options{margin:20px 0;padding:15px;background:var(--wb-paper);border:1px solid var(--wb-border);border-radius:10px}
+#readiq-wbw .wb-full-options fieldset{flex-wrap:wrap;gap:8px 20px}
+#readiq-wbw .wb-full-options small{color:var(--wb-muted);font-size:11px}
+#readiq-wbw .wb-full-ur{font:400 calc(var(--wb-size) * .8)/2 'Noto Naskh Arabic','Traditional Arabic',serif;text-align:center;margin:10px 0 20px;overflow-wrap:anywhere}
+#readiq-wbw .wb-full-en{font:400 calc(var(--wb-size) * .55)/1.8 system-ui,sans-serif;text-align:center;margin:10px 0 24px;overflow-wrap:anywhere}
+#iq-practice-live .ip-full-options{border:0;border-bottom:1px solid var(--ip-border);padding:10px 0 15px;margin:0 0 12px;display:flex;gap:10px 20px;flex-wrap:wrap}
+#iq-practice-live .ip-full-options legend{font-size:12px;font-weight:650}
+#iq-practice-live .ip-full-options label{display:flex;align-items:center;gap:6px;min-height:35px;font-size:12px}
+#iq-practice-live .ip-full-options input{accent-color:var(--ip-accent)}
+#iq-practice-live .ip-full-ur{font:400 calc(var(--ip-size) * .8)/2 'Noto Naskh Arabic','Traditional Arabic',serif;text-align:center;margin:12px 0;overflow-wrap:anywhere}
+#iq-practice-live .ip-full-en{font:400 calc(var(--ip-size) * .6)/1.8 system-ui,sans-serif;text-align:center;margin:12px 0;overflow-wrap:anywhere}

@@ -76,7 +76,7 @@ def build_word_by_word(root,stage,catalogue,payloads):
    key=canonical(word['code'])
    if key not in all_verses:raise ValueError(f'{name}, serial {word["serial"]}: Ayat {word["code"]} not found in full-verse source.')
    if key not in allowed:raise ValueError(f'{name}, serial {word["serial"]}: {word["code"]} belongs to a different quarter.')
-   word['fullAr']=all_verses[key]['ar'];word['surah']=key[1];word['ayah']=key[2];covered.add(key)
+   word['fullAr']=all_verses[key]['ar'];word['fullUr']=all_verses[key]['ur'];word['fullEn']=all_verses[key]['en'];word['surah']=key[1];word['ayah']=key[2];covered.add(key)
    surah_sheets.setdefault(key[1],set()).add(name)
   url=None
   if words:
