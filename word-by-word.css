@@ -13,3 +13,18 @@ html.readiq-wbw-open header .controls,html.readiq-wbw-open #mobileToolsButton{di
 @media(max-width:760px){#iqWordLaunch{font-size:12px;padding:8px}#readiq-wbw .wb-settings{grid-template-columns:1fr 1fr}#readiq-wbw #wb-load{grid-column:1/-1}#readiq-wbw .wb-reading-heading button{width:100%}}
 @media(max-width:420px){#readiq-wbw .wb-settings{grid-template-columns:1fr}#readiq-wbw .wb-word{flex-basis:125px}#readiq-wbw .wb-font{gap:6px}#readiq-wbw .wb-font input{width:95px}}
 @media print{#iqWordLaunch{display:none!important}#readiq-wbw .wb-settings,#readiq-wbw .wb-tools,#readiq-wbw .wb-bar button,#wb-practice,#readiq-wbw dialog{display:none!important}}
+
+/* READIQ_WORD_VERSE_CIRCLE_V1 */
+#readiq-wbw .wb-full::after,
+#iq-practice-live .ip-word-context-ar::after{
+ content:"";
+ display:inline-block;
+ width:.22em;
+ height:.22em;
+ border:max(1px,.025em) solid currentColor;
+ border-radius:50%;
+ margin-inline-start:.18em;
+ vertical-align:.2em;
+ opacity:.65;
+}
+/* READIQ_WORD_VERSE_CIRCLE_END */
