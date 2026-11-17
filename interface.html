@@ -278,6 +278,15 @@ header{justify-content:flex-start}.controls{margin-left:auto}.library-anchor{pos
 @media(pointer:coarse){#readerAlignment button{min-width:42px;min-height:44px}}
 @media print{#readerAlignment{display:none!important}}
 
+/* READIQ_MUSHAF_FONT_V1_START */
+@font-face{font-family:'ReadIQMushaf';src:url('fonts/almushaf-org.ttf?v=6c5d34c7781c') format('truetype');font-style:normal;font-weight:400;font-display:block}
+#content .verse-ar{font-family:'ReadIQMushaf'!important;font-weight:400!important;font-style:normal!important;font-synthesis:none;line-height:2.1;letter-spacing:0}
+html:not(.readiq-mushaf-ready) #content .verse-ar{visibility:hidden}
+.readiq-font-notice{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:12px 16px;margin:0 0 16px;border:1px solid #d4e9e3;border-radius:12px;background:#fffdf4;color:#18355d;font:14px/1.7 system-ui,sans-serif;text-align:center}
+.readiq-font-notice[hidden],.readiq-font-notice button[hidden]{display:none!important}
+.readiq-font-notice button{padding:8px 12px;border:1px solid #b9d7eb;border-radius:8px;background:white;color:#087ac8;font:600 13px system-ui,sans-serif}
+/* READIQ_MUSHAF_FONT_V1_END */
+
 </style></head>
 <body><header><div class="brand"><div class="brand-logo">☀️</div><div><h1>IRFAN-UL-QURAN <span class="brand-reflect">· READ • REFLECT</span></h1><small>DeTLeng Read IQ</small></div></div><div class="library-anchor"><button class="file-toggle" id="fileToggle" aria-expanded="false" aria-controls="fileMenu">📚 Library <span id="fileMenuCount">(0)</span> ▾</button><!-- READIQ_ABOUT_V1 --><a class="file-toggle readiq-about-link" href="about.html">About</a></div>
 <button type="button" class="mobile-tools-toggle" id="mobileToolsButton" aria-label="Reading settings" aria-controls="readingTools" aria-expanded="false">⚙</button><div class="controls" id="readingTools"><span class="control-label">FONT SIZE</span><button class="size-btn" id="minus" title="Smaller text">−</button><input type="range" id="fontSlider" min="18" max="72" step="1" aria-label="Font size"><button class="size-btn" id="plus" title="Larger text">+</button><span class="font-chip" id="fontValue">31px</span><button class="action" id="reset">Reset</button><button class="action" id="fullscreen">⛶ Full screen</button></div></header>
@@ -309,6 +318,28 @@ header{justify-content:flex-start}.controls{margin-left:auto}.library-anchor{pos
  let remembered=null;try{remembered=localStorage.getItem('readiq-text-alignment')}catch{}
  apply(choices.includes(remembered)?remembered:null);
  if(reset)reset.addEventListener('click',()=>apply(null));
+})();
+
+</script><script id="readiq-mushaf-loader">
+/* READIQ_MUSHAF_LOADER_V1 */
+(()=>{
+ const root=document.documentElement;
+ const notice=document.createElement('div');notice.className='readiq-font-notice';notice.setAttribute('role','status');notice.setAttribute('aria-live','polite');
+ const message=document.createElement('span'),retry=document.createElement('button');retry.type='button';retry.textContent='Retry Arabic font';notice.append(message,retry);
+ const hero=document.querySelector('.hero');if(hero)hero.insertAdjacentElement('afterend',notice);else document.body.prepend(notice);
+ let attempt=0;
+ async function load(){const current=++attempt;root.classList.remove('readiq-mushaf-ready');notice.hidden=false;retry.hidden=true;message.textContent='Loading Al_Mushaf Arabic font…';
+ let timeout;
+ try{
+  if(!document.fonts)throw Error('Font loading API unavailable');
+  const faces=await Promise.race([document.fonts.load('32px "ReadIQMushaf"','مِّنْ الْقُرُونِ'),new Promise((_,reject)=>{timeout=setTimeout(()=>reject(Error('Font download timed out')),15000)})]);
+  if(current!==attempt)return;
+  if(!faces.length||faces.some(f=>f.status!=='loaded'))throw Error('Required font did not load');
+  root.classList.add('readiq-mushaf-ready');notice.hidden=true;
+ }catch(e){if(current!==attempt)return;message.textContent='Arabic font could not load. Arabic verses are hidden to avoid showing a different font. Urdu and English remain available. ';retry.hidden=false;}
+ finally{clearTimeout(timeout)}
+ }
+ retry.onclick=load;load();
 })();
 
 </script></body></html>

@@ -124,6 +124,11 @@ def build():
  about_page=ROOT/'about.html'
  if not about_page.is_file():raise ValueError('Missing about.html')
  shutil.copy2(about_page,stage/'about.html')
+ # READIQ_MUSHAF_BUILD_V1
+ font_source=ROOT/'fonts'/'almushaf-org.ttf'
+ if not font_source.is_file():raise ValueError('Missing fonts/almushaf-org.ttf')
+ (stage/'fonts').mkdir(exist_ok=True)
+ shutil.copy2(font_source,stage/'fonts'/'almushaf-org.ttf')
  if out.exists():shutil.rmtree(out)
  stage.rename(out)
  print(f'Built {len(items)} quarters / {catalogue["count"]} verses. All text comes from supplied Word files.',flush=True)
