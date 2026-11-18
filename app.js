@@ -294,22 +294,15 @@ function renderAbout(){
   const article = aboutSource?.find(item=>item.id===(aboutLanguage==='ur'?'urdu':'english'));
   if(article){
    const copy = article.cloneNode(false);
-   const topics = aboutTopic==='irfan' ? [4,5,9] : [1,2,3,6,8];
-   for(const id of topics){
-    const section = article.querySelector('#'+aboutLanguage+'-topic-'+id);
-    if(section)copy.append(section.cloneNode(true));
-   }
-   if(aboutTopic==='readiq'){
-    const section = document.createElement('section');
-    section.className = 'topic';
-    const heading = document.createElement('h3');
-    const paragraph = document.createElement('p');
-    heading.textContent = aboutLanguage==='ur'?'مشق اور مزید سہولتیں':'Practice and reading tools';
-    paragraph.textContent = aboutLanguage==='ur'
-     ? 'Explore سے آیت بہ آیت یا لفظ بہ لفظ سوالات اور فلیش کارڈز کھولیے۔ ترتیبات سے زبان، حروف کا حجم اور متن کی سیدھ منتخب کیجیے۔ سورت کے ساتھ معلومات کے نشان سے تفصیل، اور اسماء کے حصے سے اسمائے حسنیٰ اور اسمائے نبی ﷺ دیکھیے۔'
-     : 'Use Explore to open verse-by-verse or word-by-word MCQs and flashcards. Adjust languages, text size and alignment in Settings. Open a Surah’s information panel for its details or visit Asma to browse the names.';
-    section.append(heading,paragraph);
-    copy.prepend(section);
+   // READIQ_ABOUT_CURRENT_V1
+   if (aboutTopic === 'readiq') {
+    const template = aboutSource.find(item => item.id === 'readiq-' + aboutLanguage);
+    copy.append(...Array.from(template.children, child => child.cloneNode(true)));
+   } else {
+    for (const id of [4, 5, 9]) {
+     const section = article.querySelector('#' + aboutLanguage + '-topic-' + id);
+     if (section) copy.append(section.cloneNode(true));
+    }
    }
    content.append(copy);
   }
@@ -324,7 +317,7 @@ async function openAbout(){window.ReadIQWordByWord?.hide();window.ReadIQPractice
  setFileMenu(false);showParaMenu(false);showSurahMenu(false);tools(false);
  title.textContent='About Irfan-ul-Quran Read IQ';content.textContent='Opening About…';
  try{
-  if(aboutTopic!=='further'&&!aboutSource){const r=await fetch('about.html',{cache:'no-store'});if(!r.ok)throw Error('About page unavailable');const doc=new DOMParser().parseFromString(await r.text(),'text/html');const articles=[...doc.querySelectorAll('article.language-document')];if(articles.length!==2)throw Error('About content could not be read');aboutSource=articles;}
+  if(aboutTopic!=='further'&&!aboutSource){const r=await fetch('about.html',{cache:'no-store'});if(!r.ok)throw Error('About page unavailable');const doc=new DOMParser().parseFromString(await r.text(),'text/html');const articles=[...doc.querySelectorAll('article.language-document')];if(articles.length!==4)throw Error('About content could not be read');aboutSource=articles;}
   if(request!==token)return;renderAbout();
  }catch(e){if(request===token)content.textContent=e.message;}
 }
