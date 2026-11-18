@@ -6,20 +6,75 @@ const bridge=window.ReadIQPracticeBridge;
 if(!bridge)return;
 const anchor=document.querySelector('.library-anchor'),reader=document.querySelector('main .reader');
 if(!anchor||!reader||document.getElementById('iqPracticeLaunch'))return;
-const button=document.createElement('button');button.type='button';button.id='iqPracticeLaunch';button.className='file-toggle';button.textContent='☷ Practice';button.title='MCQs and Flashcards for the opened Quarter, Para or Surah';anchor.append(button);
+const button=document.createElement('button');button.type='button';button.id='iqPracticeLaunch';button.className='file-toggle';button.textContent='MCQs & Flashcards ▾';button.setAttribute('aria-controls','iqPracticeMenu');button.title='MCQs and Flashcards for the opened Quarter, Para or Surah';anchor.append(button);
 let root=null,mounted=null,identity=null;
-function hide(){if(root)root.hidden=true;if(mounted)mounted.destroy();reader.hidden=false;document.documentElement.classList.remove('readiq-practice-open');button.setAttribute('aria-expanded','false')}
+function hide(){closeMenu();if(root)root.hidden=true;if(mounted)mounted.destroy();reader.hidden=false;document.documentElement.classList.remove('readiq-practice-open');button.setAttribute('aria-expanded','false')}
+// READIQ_PRACTICE_MENU_V1
+const menu = document.createElement('div');
+menu.id = 'iqPracticeMenu';
+menu.className = 'file-menu';
+menu.hidden = true;
+menu.setAttribute('aria-label','MCQs & Flashcards');
+const verseChoice = document.createElement('button');
+const wordChoice = document.createElement('button');
+verseChoice.type = wordChoice.type = 'button';
+verseChoice.textContent = '☷ Verse by Verse';
+wordChoice.textContent = '▦ Word by Word';
+menu.append(verseChoice, wordChoice);
+document.body.append(menu);
+function closeMenu() {
+ menu.hidden = true;
+ button.setAttribute('aria-expanded','false');
+}
+function positionMenu() {
+ if(menu.hidden)return;
+ const box = button.getBoundingClientRect();
+ const width = menu.getBoundingClientRect().width;
+ menu.style.left = Math.max(12,Math.min(box.left,innerWidth-width-12)) + 'px';
+ menu.style.top = Math.ceil(anchor.closest('header').getBoundingClientRect().bottom)+6+'px';
+}
+document.addEventListener('pointerdown',e=>{
+ if(!menu.contains(e.target)&&!button.contains(e.target))closeMenu();
+});
+document.addEventListener('focusin',e=>{
+ if(!menu.contains(e.target)&&!button.contains(e.target))closeMenu();
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&!menu.hidden){closeMenu();button.focus();}
+});
+window.addEventListener('resize',positionMenu);
+window.addEventListener('scroll',positionMenu,{passive:true});
 window.ReadIQPractice={hide,openContext};button.setAttribute('aria-expanded','false');
-function availability(){try{const snap=bridge.snapshot();button.disabled=!snap.rows.length;button.title='Practice '+snap.title}catch{button.disabled=true;button.title='Open a Quarter, Para or Surah to practise'}}
+function availability(){try{const snap=bridge.snapshot();verseChoice.disabled=!snap.rows.length;verseChoice.title='Practice '+snap.title}catch{verseChoice.disabled=true;verseChoice.title='Open a Quarter, Para or Surah to practise'}}
 function openContext(context){
  window.ReadIQWordByWord?.hide();
  const id=JSON.stringify([context.revision,context.mode,context.sourceId,context.languages,context.rows.map(v=>v.id||v.code)]);
  if(!root||id!==identity){if(mounted)mounted.destroy();if(root)root.remove();const temp=document.createElement('div');temp.innerHTML=markup;root=temp.firstElementChild;reader.before(root);mounted=mountPractice(root,context);identity=id;}
- root.hidden=false;reader.hidden=true;document.documentElement.classList.add('readiq-practice-open');button.setAttribute('aria-expanded','true');
+ root.hidden=false;reader.hidden=true;document.documentElement.classList.add('readiq-practice-open');closeMenu();
  document.querySelectorAll('.file-menu').forEach(m=>m.hidden=true);document.querySelectorAll('[aria-controls$="Menu"]').forEach(b=>b.setAttribute('aria-expanded','false'));
  root.scrollIntoView({block:'start',behavior:'smooth'});
 }
-button.onclick=()=>{try{openContext(bridge.snapshot())}catch(e){window.alert(e.message)}};
+button.onclick=()=>{
+ if(!menu.hidden){closeMenu();return;}
+ document.querySelectorAll('.file-menu').forEach(panel=>panel.hidden=true);
+ document.querySelectorAll('[aria-controls$="Menu"]').forEach(control=>control.setAttribute('aria-expanded','false'));
+ availability();
+ wordChoice.disabled=!window.ReadIQWordByWord?.openPractice;
+ menu.hidden=false;
+ positionMenu();
+ button.setAttribute('aria-expanded','true');
+ (verseChoice.disabled?wordChoice:verseChoice).focus();
+};
+verseChoice.onclick=()=>{
+ closeMenu();
+ button.focus();
+ try{openContext(bridge.snapshot())}catch(e){window.alert(e.message)}
+};
+wordChoice.onclick=()=>{
+ closeMenu();
+ button.focus();
+ window.ReadIQWordByWord?.openPractice();
+};
 new MutationObserver(availability).observe(document.getElementById('content'),{childList:true,subtree:true});availability();
 
 function mountPractice(root,context){
