@@ -416,6 +416,33 @@ html.readiq-wbw-open header #mobileToolsButton {display:none!important;}
 #iqExploreMenu {background:light-dark(#fbfdff,#192e3a);}
 #iqExploreMenu .file-toggle:is(:hover,:focus-visible) {background:light-dark(#e4f3ff,#26465a);}
 #iqExploreMenu [hidden],#iqExploreMenu[hidden] {display:none!important;}
+
+/* READIQ_SURAH_HEADING_V1 */
+#content .iq-surah-heading {
+ margin:1.25rem 0 .65rem;padding:0;border:1px solid light-dark(#bdd7e6,#466373);
+ border-radius:12px;background:light-dark(#eaf5fb,#192e3a);
+ color:light-dark(#163649,#e2f3fa);text-align:start;
+ font:400 1rem/1.55 system-ui,sans-serif;
+}
+#content .iq-surah-heading > summary {
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ padding:8px 13px;list-style:none;cursor:pointer;
+}
+#content .iq-surah-heading > summary::-webkit-details-marker {display:none;}
+.iq-surah-name {font-weight:800;overflow-wrap:anywhere;}
+.iq-surah-name [lang=ar] {font:400 1.65em/1.5 ReadIQMushaf,serif;}
+html:not(.readiq-mushaf-ready) .iq-surah-name [lang=ar] {visibility:hidden;}
+.iq-surah-info-icon {
+ flex:none;display:grid;place-items:center;width:1.55rem;height:1.55rem;
+ border:1px solid currentColor;border-radius:50%;font-weight:800;
+}
+.iq-surah-info {
+ border-top:1px solid light-dark(#bdd7e6,#466373);padding:9px 13px;
+ text-align:right;white-space:pre-wrap;overflow-wrap:anywhere;
+ font:400 1.12rem/1.8 'Noto Naskh Arabic','Traditional Arabic',serif;
+}
+.iq-surah-sr {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}
+#content .iq-surah-heading + .iq-bismillah {margin-top:0;}
 </style><link id="readiq-practice-style" rel="stylesheet" href="practice.css?v=0bf08f6759f7"><link id="readiq-word-style" rel="stylesheet" href="word-by-word.css?v=0a3193248d279500">
 </head>
 <body><header><div class="brand"><div class="brand-logo">☀️</div><div><h1>IRFAN-UL-QURAN <span class="brand-reflect">· READ • REFLECT</span></h1><small>DeTLeng Read IQ</small></div></div><div class="library-anchor"><button class="file-toggle" id="fileToggle" aria-expanded="false" aria-controls="fileMenu">📚 Library <span id="fileMenuCount">(0)</span> ▾</button><!-- READIQ_ABOUT_V1 --><a class="file-toggle readiq-about-link" href="about.html">About</a></div>
@@ -430,7 +457,7 @@ html.readiq-wbw-open header #mobileToolsButton {display:none!important;}
 
 <main><div class="hero"><span><span class="status-dot"></span><span id="status">Opening library…</span></span></div>
 <div class="tab-wrap"><nav class="tabs" id="tabs" aria-label="Library documents"></nav></div><section class="reader"><div class="dochead"><h2 id="documentTitle">Welcome to your reading space</h2><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><input class="search" id="search" type="search" placeholder="Find in opened file…" aria-label="Search within document"><span id="languageSummary" class="language-summary"></span><span class="pill" id="fileCount">0 FILES</span></div></div><article class="content" id="content"><div class="empty"><div class="sun">📖</div><h2>Your reading journey starts here</h2><p>Choose a document from the Library to begin reading.</p></div></article></section><div class="footer">Read at your own pace. Reflect on every verse. · <a href="https://www.detleng.com/" target="_blank" rel="noopener noreferrer">Explore DeTLeng ↗</a></div></main>
-<script defer src="app.js?v=abae14c2e885e5fe"></script>
+<script defer src="app.js?v=319ea5e6461e8dfc"></script>
 <script id="readiq-practice-script" defer src="practice.js?v=5c5b3ff0ebb4cf82"></script>
 <script id="readiq-word-script" defer src="word-by-word.js?v=fab5c657ffdfd3ba"></script>
 <script>
