@@ -15,8 +15,32 @@ function renderLibrary(){const open=new Set([...fileCards.querySelectorAll('deta
 for(const para of catalogue.folders){const d=document.createElement('details');d.dataset.para=String(para);d.open=open.has(String(para))||selected?.para===para;const summary=document.createElement('summary');summary.textContent='📚 Para-'+String(para).padStart(2,'0');d.append(summary);const list=document.createElement('div');list.className='quarter-list';for(let q=1;q<=4;q++){const file=catalogue.files.find(f=>f.para===para&&f.quarter===q);const labels=[['First Quarter','پہلا ربع'],['Second Quarter','نصف'],['Third Quarter','تیسرا ربع'],['Fourth Quarter','آخری ربع']][q-1];const b=document.createElement('button');b.className='quarter-row'+(selected?.id===file?.id?' active':'');b.type='button';b.disabled=!file;const en=document.createElement('span');en.textContent=labels[0];const ur=document.createElement('span');ur.lang='ur';ur.dir='rtl';ur.textContent=labels[1];b.append(en,' — ',ur);if(file)b.onclick=()=>{setFileMenu(false);openFile(file);window.scrollTo({top:0,behavior:'smooth'})};else{b.title='File not added yet';b.setAttribute('aria-label',labels[0]+' — file not added yet')}list.append(b)}d.append(list);fileCards.append(d)}
 if(!catalogue.folders.length)fileCards.textContent='No Para folders yet.';document.getElementById('fileMenuCount').textContent='('+catalogue.files.length+')';}
 function selectedLanguages(){return checks.filter(c=>c.checked).map(c=>c.dataset.language)}
+
+// READIQ_PARA_TITLE_V1
+function appendParaTitle() {
+ if (readingMode !== 'para') return;
+ const names = paraNames[Number(currentPara)-1];
+ if (!names) return;
+ const card = document.createElement('section');
+ card.className = 'iq-para-title';
+ const number = document.createElement('span');
+ number.className = 'iq-para-number';
+ number.textContent = 'Para ' + String(currentPara).padStart(2,'0');
+ const arabic = document.createElement('h2');
+ arabic.lang = 'ar';
+ arabic.dir = 'rtl';
+ arabic.textContent = names[0];
+ const roman = document.createElement('p');
+ roman.lang = 'en';
+ roman.dir = 'ltr';
+ roman.textContent = names[1];
+ card.append(number,arabic,roman);
+ content.append(card);
+}
+
 function render(){if(readingMode==='asma'){renderAsma();return}content.classList.remove('asma-mode');if(readingMode==='about'){renderAbout();return}content.classList.remove('about-mode');const langs=selectedLanguages();content.replaceChildren();document.getElementById('languageSummary').textContent=langs.map(k=>({ar:'Arabic',ur:'Urdu',en:'English'})[k]).join(' · ');document.getElementById('fileCount').textContent=verses.length+' VERSES';
 if(window.ReadIQBismillah.applies(verses[0]?.code,true))content.append(window.ReadIQBismillah.block());
+appendParaTitle();
 if(!langs.length){const p=document.createElement('p');p.className='empty';p.textContent='Choose Arabic, Urdu or English from Library.';content.append(p);return}
 if(!verses.length){const p=document.createElement('p');p.className='empty';p.textContent='Choose a quarter from Library to begin reading.';content.append(p);return}
 for(const [index,v] of verses.entries()){
@@ -54,7 +78,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!paraMenu.hidden){s
 window.addEventListener('resize',positionParas);new ResizeObserver(positionParas).observe(header);
 function renderParasMenu(){paraList.replaceChildren();paraNames.forEach(([arabic,roman],i)=>{const para=i+1;const complete=[1,2,3,4].every(q=>catalogue.files.some(f=>f.para===para&&f.quarter===q));const b=document.createElement('button');b.type='button';b.className='para-option'+(readingMode==='para'&&currentPara===para?' active':'');b.disabled=!complete;const top=document.createElement('span');top.className='para-option-title';const num=document.createElement('span');num.textContent=String(para).padStart(2,'0')+' · ';const ar=document.createElement('span');ar.lang='ar';ar.dir='rtl';ar.textContent=arabic;top.append(num,ar);const bottom=document.createElement('small');bottom.textContent=roman;b.append(top,bottom);if(!complete)b.title='All four quarter files are required';b.onclick=()=>{showParaMenu(false);openPara(para);window.scrollTo({top:0,behavior:'smooth'})};paraList.append(b)})}
 async function openPara(para){window.ReadIQWordByWord?.hide();window.ReadIQPractice?.hide();clearAsmaHash();
- const n=++token;readingMode='para';currentPara=para;selected={para,id:'para-'+para};save('readiq-mode','para');save('readiq-para',para);renderLibrary();renderParasMenu();renderSurahsMenu();verses=[];search.value='';title.textContent='Para-'+String(para).padStart(2,'0')+' · '+(paraNames[para-1]?.[0]||'')+' · Complete Para';content.textContent='Opening all four quarters…';document.getElementById('fileCount').textContent='0 VERSES';
+ const n=++token;readingMode='para';currentPara=para;selected={para,id:'para-'+para};save('readiq-mode','para');save('readiq-para',para);renderLibrary();renderParasMenu();renderSurahsMenu();verses=[];search.value='';title.textContent='Para-'+String(para).padStart(2,'0')+' · '+(paraNames[para-1]?.[0]||'')+' · Complete Para';content.replaceChildren();appendParaTitle();content.append('Opening all four quarters…');document.getElementById('fileCount').textContent='0 VERSES';
  try{
   const files=[1,2,3,4].map(q=>catalogue.files.find(f=>f.para===para&&f.quarter===q));if(files.some(f=>!f))throw Error('This Para needs all four quarter files.');
   const parts=await Promise.all(files.map(async f=>{const response=await fetch(f.url,{cache:'no-store'});if(!response.ok)throw Error('Cannot open '+f.label);const data=await response.json();if(!Array.isArray(data.verses))throw Error('Invalid quarter content');return data.verses}));
