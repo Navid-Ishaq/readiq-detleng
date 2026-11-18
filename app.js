@@ -229,6 +229,7 @@ let aboutSource=null;
 // READIQ_FURTHER_LINKS_V1
 const savedAboutLanguage = saved('readiq-about-language','en');
 let aboutLanguage = ['en','ur','further'].includes(savedAboutLanguage) ? savedAboutLanguage : 'en';
+// READIQ_FURTHER_TABS_V1
 function buildFurtherReading() {
  const section = document.createElement('section');
  section.className = 'iq-further-reading';
@@ -246,6 +247,8 @@ function buildFurtherReading() {
   const item = document.createElement('li');
   const link = document.createElement('a');
   link.href = url;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
   link.textContent = label;
   item.append(link);
   list.append(item);
