@@ -25,7 +25,17 @@ const wordChoice = document.createElement('button');
 verseChoice.type = wordChoice.type = 'button';
 verseChoice.textContent = '☷ Verse by Verse';
 wordChoice.textContent = '▦ Word by Word';
-menu.append(verseChoice, wordChoice);
+// READIQ_PRACTICE_SCOPE_V1
+const selectionGuide = document.createElement('div');
+selectionGuide.className = 'iq-practice-guide';
+const instructions = document.createElement('p');
+instructions.textContent = 'Verse by Verse uses the last quarter, Para, or Surah you opened.';
+const currentSelection = document.createElement('p');
+currentSelection.className = 'iq-practice-selection';
+const wordInstructions = document.createElement('p');
+wordInstructions.textContent = 'Word by Word uses your active word selection when one is open.';
+selectionGuide.append(instructions, currentSelection, wordInstructions);
+menu.append(selectionGuide, verseChoice, wordChoice);
 document.body.append(menu);
 function closeMenu() {
  menu.hidden = true;
@@ -50,7 +60,7 @@ document.addEventListener('keydown',e=>{
 window.addEventListener('resize',positionMenu);
 window.addEventListener('scroll',positionMenu,{passive:true});
 window.ReadIQPractice={hide,openContext};button.setAttribute('aria-expanded','false');
-function availability(){try{const snap=bridge.snapshot();verseChoice.disabled=!snap.rows.length;verseChoice.title='Practice '+snap.title}catch{verseChoice.disabled=true;verseChoice.title='Open a Quarter, Para or Surah to practise'}}
+function availability(){try{const snap=bridge.snapshot();verseChoice.disabled=!snap.rows.length;verseChoice.title='Practice '+snap.title;currentSelection.textContent='Reading selection: '+snap.title}catch{verseChoice.disabled=true;verseChoice.title='Open a Quarter, Para or Surah to practise';currentSelection.textContent='Open a quarter in Library, a Para in Paras, or a Surah in Surahs.'}}
 function openContext(context){
  window.ReadIQWordByWord?.hide();
  const id=JSON.stringify([context.revision,context.mode,context.sourceId,context.languages,context.rows.map(v=>v.id||v.code)]);
