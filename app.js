@@ -226,6 +226,7 @@ renderSurahsMenu();
 let aboutSource=null;
 // READIQ_ABOUT_LANG_V1
 // READIQ_FURTHER_READING_V1
+// READIQ_FURTHER_LINKS_V1
 const savedAboutLanguage = saved('readiq-about-language','en');
 let aboutLanguage = ['en','ur','further'].includes(savedAboutLanguage) ? savedAboutLanguage : 'en';
 function buildFurtherReading() {
@@ -235,8 +236,8 @@ function buildFurtherReading() {
  title.textContent = 'مزید مطالعہ / Further Reading';
  section.append(title);
  const articles = [
-  ['تعارف عرفان القرآن', 'https://replay.minhaj.tv/urdu/tid/45084/'],
-  ['عرفان القرآن اور جدید سائنسی علوم: دیگر تراجم کے ساتھ ایک تقابلی مطالعہ — شیخ عبدالعزیز دباغ', 'https://www.vision.minhaj.org/urdu/tid/45085/']
+  ['تعارف عرفان القرآن', 'https://www.irfan-ul-quran.com/urdu/tid/45084/%D8%AA%D8%B9%D8%A7%D8%B1%D9%81-%D8%B9%D8%B1%D9%81%D8%A7%D9%86-%D8%A7%D9%84%D9%82%D8%B1%D8%A2%D9%86.html'],
+  ['عرفان القرآن اور جدید سائنسی علوم: دیگر تراجم کے ساتھ ایک تقابلی مطالعہ — شیخ عبدالعزیز دباغ', 'https://www.irfan-ul-quran.com/urdu/tid/45085/%D8%B9%D8%B1%D9%81%D8%A7%D9%86-%D8%A7%D9%84%D9%82%D8%B1%D8%A2%D9%86-%D8%A7%D9%88%D8%B1-%D8%AC%D8%AF%DB%8C%D8%AF-%D8%B3%D8%A7%D8%A6%D9%86%D8%B3%DB%8C-%D8%B9%D9%84%D9%88%D9%85:-%D8%AF%DB%8C%DA%AF%D8%B1-%D8%AA%D8%B1%D8%A7%D8%AC%D9%85-%DA%A9%DB%8C%D8%B3%D8%A7%D8%AA%DA%BE-%D8%A7%DB%8C%DA%A9-%D8%AA%D9%82%D8%A7%D8%A8%D9%84%DB%8C-%D9%85%D8%B7%D8%A7%D9%84%D8%B9%DB%81-%D8%B4%DB%8C%D8%AE-%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D8%B9%D8%B2%DB%8C%D8%B2-%D8%AF%D8%A8%D8%A7%D8%BA.html']
  ];
  const list = document.createElement('ul');
  list.lang = 'ur';
