@@ -4,93 +4,88 @@
 const markup="<div id=\"iq-practice-live\" hidden>\n<header class=\"ip-brandbar\"><div class=\"ip-brand\">IRFAN-UL-QURAN<small>DeTLeng Read IQ · PRACTICE EACH AYAT</small></div><button id=\"ip-exit\" type=\"button\">← Back to reading</button></header>\n<main class=\"ip-shell\">\n<section id=\"ip-groups\" hidden><span class=\"ip-eyebrow\">Choose your next step</span><h2>One group. A little more understanding.</h2><p class=\"ip-sub\">Practice your selected reading section. Progress stays in this page only.</p><div class=\"ip-group-panel\"><div class=\"ip-form-grid\"><div><span>Reading selection</span><output id=\"ip-scope-label\" class=\"ip-source-label\"></output></div><label>Questions per group<select id=\"ip-size\"><option>10</option><option>15</option><option>20</option><option>25</option><option>30</option></select></label><label>Start question<input id=\"ip-start-range\" type=\"number\" min=\"1\" value=\"1\"></label><label>End question<input id=\"ip-end-range\" type=\"number\" min=\"1\" value=\"1\"></label></div><fieldset class=\"ip-language\"><legend>Answer translations</legend><label><input id=\"ip-urdu\" type=\"checkbox\" checked>Urdu</label><label><input id=\"ip-english\" type=\"checkbox\" checked>English</label></fieldset><p class=\"ip-message\" id=\"ip-validation\" role=\"status\"></p><div id=\"ip-group-buttons\" class=\"ip-group-grid\"></div><p class=\"ip-info\">Green: 100% correct · Red: needs practice · Blue: in progress · Blank: unattempted</p><label><input id=\"ip-order\" type=\"checkbox\"> Shuffle question order</label><button class=\"ip-primary ip-start\" id=\"ip-generate\" style=\"margin-top:18px\">Start selected group →</button></div></section>\n<section id=\"ip-play\"><div class=\"ip-bar\"><button id=\"ip-back\">← Back to Question Groups</button><button id=\"ip-restart\">↻ Restart attempt</button></div><div class=\"ip-bar\"><div><span class=\"ip-eyebrow\">Practice, flip, remember</span><h2 id=\"ip-title\">Para 01 · First Quarter</h2></div><span id=\"ip-position\" class=\"ip-number-badge\"></span></div><div class=\"ip-tabs\"><button id=\"ip-mcq\" class=\"ip-mode\" aria-pressed=\"true\">☷ MCQ · 3 options</button><button id=\"ip-flash\" class=\"ip-mode\" aria-pressed=\"false\">▣ Classic Flashcards · Q & A</button></div><div class=\"ip-learning\" id=\"ip-mode-row\"><button id=\"ip-learn\" aria-pressed=\"true\"><strong>Learning Mode</strong><small>Instant feedback · First answer locks</small></button><button id=\"ip-test\" aria-pressed=\"false\"><strong>Test Mode</strong><small>Change answers · Results at the end</small></button></div><div class=\"ip-minirow\"><span class=\"ip-info\" id=\"ip-state\"></span><button id=\"ip-finish\">Finish Test</button></div><div class=\"ip-controls\"><span>Reading size</span><button id=\"ip-smaller\" aria-label=\"Smaller text\">−</button><input id=\"ip-fontsize\" type=\"range\" min=\"22\" max=\"40\" value=\"28\" aria-label=\"Reading font size\"><button id=\"ip-larger\" aria-label=\"Larger text\">+</button><span id=\"ip-fontvalue\">28px</span><button id=\"ip-reset-font\">Reset</button></div><section class=\"ip-question\" id=\"ip-card\"><div class=\"ip-q-meta\"><span id=\"ip-side\">Question side</span><span id=\"ip-qnumber\"></span></div><button id=\"ip-verse\" class=\"ip-verse\" aria-label=\"Flip this verse to its answer\"><span id=\"ip-arabic\" class=\"ip-ar\" lang=\"ar\" dir=\"rtl\" style=\"display:block\"></span></button><p id=\"ip-code\" class=\"ip-code\"></p><div id=\"ip-answer-area\"></div><p id=\"ip-feedback\" class=\"ip-feedback\" aria-live=\"polite\"></p></section><p id=\"ip-hint\" class=\"ip-hint\"></p><div class=\"ip-nav\"><button id=\"ip-prev\">← Previous</button><button id=\"ip-flip\">↻ Flip card</button><button id=\"ip-next\" class=\"ip-primary\">Next →</button></div><div class=\"ip-shuffle\"><button id=\"ip-shuffle-options\">⇄ Shuffle options</button><button id=\"ip-shuffle-questions\">⤨ Shuffle questions</button></div><div class=\"ip-navigation\"><h3>Question navigation</h3><p class=\"ip-info\">Choose a number to revisit a question.</p><div id=\"ip-numbers\" class=\"ip-question-numbers\"></div><p class=\"ip-info\" id=\"ip-legend\"></p></div></section>\n</main>\n<p class=\"ip-font\">Al_Mushaf · Session-only practice · No scores stored</p>\n<dialog id=\"ip-result\"><button class=\"ip-close\" id=\"ip-close-result\" aria-label=\"Close results\">×</button><div style=\"clear:both\"></div><span style=\"font-size:32px;color:var(--ip-accent)\" aria-hidden=\"true\">✦</span><p class=\"ip-eyebrow\">Your practice, your progress</p><h2 class=\"ip-result-title\" id=\"ip-result-title\"></h2><div id=\"ip-score\" class=\"ip-result-score\"></div><strong id=\"ip-percent\"></strong><p id=\"ip-counts\" class=\"ip-result-message\"></p><p id=\"ip-motivation\" class=\"ip-result-message\"></p><div class=\"ip-result-actions\"><button id=\"ip-review\">Review Answers</button><button id=\"ip-again\" class=\"ip-primary\">Try Again →</button><button id=\"ip-result-back\">← Back to Question Groups</button></div></dialog>\n<dialog id=\"ip-confirm\"><h2 id=\"ip-confirm-title\" class=\"ip-result-title\">Restart this attempt?</h2><p id=\"ip-confirm-text\" class=\"ip-result-message\"></p><div class=\"ip-result-actions\"><button id=\"ip-confirm-yes\" class=\"ip-primary\">Restart attempt</button><button id=\"ip-confirm-no\">Cancel</button></div></dialog>\n</div>\n";
 const bridge=window.ReadIQPracticeBridge;
 if(!bridge)return;
-const anchor=document.querySelector('.library-anchor'),reader=document.querySelector('main .reader');
-if(!anchor||!reader||document.getElementById('iqPracticeLaunch'))return;
-const button=document.createElement('button');button.type='button';button.id='iqPracticeLaunch';button.className='file-toggle';button.textContent='MCQs & Flashcards ▾';button.setAttribute('aria-controls','iqPracticeMenu');button.title='MCQs and Flashcards for the opened Quarter, Para or Surah';// READIQ_EXPLORE_V1
-const exploreMenu = document.getElementById('iqExploreMenu');
-if (exploreMenu) {
- const asma = document.getElementById('asmaToggle');
- exploreMenu.insertBefore(button,asma);
-} else anchor.append(button);
-let root=null,mounted=null,identity=null;
-function hide(){closeMenu();if(root)root.hidden=true;if(mounted)mounted.destroy();reader.hidden=false;document.documentElement.classList.remove('readiq-practice-open');button.setAttribute('aria-expanded','false')}
-// READIQ_PRACTICE_MENU_V1
-const menu = document.createElement('div');
-menu.id = 'iqPracticeMenu';
-menu.className = 'file-menu';
-menu.hidden = true;
-menu.setAttribute('aria-label','MCQs & Flashcards');
+// READIQ_READING_PRACTICE_V1
+const reader = document.querySelector('main .reader');
+const heading = document.getElementById('documentTitle');
+if (!reader || !heading) return;
+const shortcuts = document.createElement('section');
+shortcuts.className = 'iq-reading-practice';
+shortcuts.hidden = true;
+shortcuts.setAttribute('aria-label','MCQs & Flashcards');
+const label = document.createElement('strong');
+label.textContent = 'MCQs & Flashcards';
+const controls = document.createElement('div');
 const verseChoice = document.createElement('button');
 const wordChoice = document.createElement('button');
 verseChoice.type = wordChoice.type = 'button';
 verseChoice.textContent = '☷ Verse by Verse';
 wordChoice.textContent = '▦ Word by Word';
-// READIQ_PRACTICE_SCOPE_V1
-const selectionGuide = document.createElement('div');
-selectionGuide.className = 'iq-practice-guide';
-const instructions = document.createElement('p');
-instructions.textContent = 'Verse by Verse uses the last quarter, Para, or Surah you opened.';
-const currentSelection = document.createElement('p');
-currentSelection.className = 'iq-practice-selection';
-const wordInstructions = document.createElement('p');
-wordInstructions.textContent = 'Word by Word uses your active word selection when one is open.';
-selectionGuide.append(instructions, currentSelection, wordInstructions);
-menu.append(selectionGuide, verseChoice, wordChoice);
-document.body.append(menu);
-function closeMenu() {
- menu.hidden = true;
- button.setAttribute('aria-expanded','false');
+const coverageNote = document.createElement('small');
+coverageNote.id = 'iqWordCoverage';
+coverageNote.setAttribute('aria-live','polite');
+wordChoice.setAttribute('aria-describedby', coverageNote.id);
+controls.append(verseChoice, wordChoice);
+shortcuts.append(label, controls, coverageNote);
+heading.after(shortcuts);
+
+let root = null, mounted = null, identity = null;
+let currentKey = null;
+let refreshTicket = 0;
+function hide(){
+ if (root) root.hidden = true;
+ if (mounted) mounted.destroy();
+ reader.hidden = false;
+ document.documentElement.classList.remove('readiq-practice-open');
 }
-function positionMenu() {
- if(menu.hidden)return;
- const box = (document.getElementById('iqExploreToggle') || button).getBoundingClientRect();
- const width = menu.getBoundingClientRect().width;
- menu.style.left = Math.max(12,Math.min(box.left,innerWidth-width-12)) + 'px';
- menu.style.top = Math.ceil(anchor.closest('header').getBoundingClientRect().bottom)+6+'px';
-}
-document.addEventListener('pointerdown',e=>{
- if(!menu.contains(e.target)&&!button.contains(e.target))closeMenu();
-});
-document.addEventListener('focusin',e=>{
- if(!menu.contains(e.target)&&!button.contains(e.target))closeMenu();
-});
-document.addEventListener('keydown',e=>{
- if(e.key==='Escape'&&!menu.hidden){closeMenu();(document.getElementById('iqExploreToggle') || button).focus();}
-});
-window.addEventListener('resize',positionMenu);
-window.addEventListener('scroll',positionMenu,{passive:true});
-window.ReadIQPractice={hide,openContext};button.setAttribute('aria-expanded','false');
-function availability(){try{const snap=bridge.snapshot();verseChoice.disabled=!snap.rows.length;verseChoice.title='Practice '+snap.title;currentSelection.textContent='Reading selection: '+snap.title}catch{verseChoice.disabled=true;verseChoice.title='Open a Quarter, Para or Surah to practise';currentSelection.textContent='Open a quarter in Library, a Para in Paras, or a Surah in Surahs.'}}
 function openContext(context){
  window.ReadIQWordByWord?.hide();
  const id=JSON.stringify([context.revision,context.mode,context.sourceId,context.languages,context.rows.map(v=>v.id||v.code)]);
  if(!root||id!==identity){if(mounted)mounted.destroy();if(root)root.remove();const temp=document.createElement('div');temp.innerHTML=markup;root=temp.firstElementChild;reader.before(root);mounted=mountPractice(root,context);identity=id;}
- root.hidden=false;reader.hidden=true;document.documentElement.classList.add('readiq-practice-open');closeMenu();
+ root.hidden=false;reader.hidden=true;document.documentElement.classList.add('readiq-practice-open');
  document.querySelectorAll('.file-menu').forEach(m=>m.hidden=true);document.querySelectorAll('[aria-controls$="Menu"]').forEach(b=>b.setAttribute('aria-expanded','false'));
  root.scrollIntoView({block:'start',behavior:'smooth'});
 }
-button.onclick=()=>{
- if(!menu.hidden){closeMenu();return;}
- document.querySelectorAll('.file-menu').forEach(panel=>panel.hidden=true);
- document.querySelectorAll('[aria-controls$="Menu"]').forEach(control=>control.setAttribute('aria-expanded','false'));
- availability();
- wordChoice.disabled=!window.ReadIQWordByWord?.openPractice;
- menu.hidden=false;
- positionMenu();
- button.setAttribute('aria-expanded','true');
- (verseChoice.disabled?wordChoice:verseChoice).focus();
+
+window.ReadIQPractice = {hide, openContext};
+async function refreshShortcuts(){
+ const choice = bridge.readingSelection();
+ const word = window.ReadIQWordByWord;
+ const key = choice && JSON.stringify(choice);
+ shortcuts.hidden = !choice;
+ if (key === currentKey && (word || !choice)) return;
+ const ticket = ++refreshTicket;
+ currentKey = word ? key : null;
+ wordChoice.disabled = true;
+ coverageNote.textContent = '';
+ if (!choice || !word) return;
+ coverageNote.textContent = 'Checking word availability…';
+ try {
+  const {covered, expected} = await word.coverage(choice);
+  if (ticket !== refreshTicket) return;
+  wordChoice.disabled = covered === 0;
+  coverageNote.textContent = !covered ? 'Word by Word · Coming soon'
+   : covered < expected ? 'Word by Word · ' + covered + ' of ' + expected + ' verses available' : '';
+ } catch {
+  if (ticket !== refreshTicket) return;
+  wordChoice.disabled = false;
+  coverageNote.textContent = 'Word coverage could not be checked.';
+ }
+}
+verseChoice.onclick = () => {
+ try { openContext(bridge.snapshot()); }
+ catch (error) { window.alert(error.message); }
 };
-verseChoice.onclick=()=>{
- closeMenu();
- (document.getElementById('iqExploreToggle') || button).focus();
- try{openContext(bridge.snapshot())}catch(e){window.alert(e.message)}
+wordChoice.onclick = () => {
+ const choice = bridge.readingSelection();
+ if (choice && JSON.stringify(choice) === currentKey) {
+  window.ReadIQWordByWord.openPractice(choice);
+ }
 };
-wordChoice.onclick=()=>{
- closeMenu();
- (document.getElementById('iqExploreToggle') || button).focus();
- window.ReadIQWordByWord?.openPractice();
-};
-new MutationObserver(availability).observe(document.getElementById('content'),{childList:true,subtree:true});availability();
+const observer = new MutationObserver(refreshShortcuts);
+observer.observe(document.getElementById('content'), {childList:true, subtree:true});
+observer.observe(heading, {childList:true});
+window.addEventListener('readiq-word-ready', refreshShortcuts);
+refreshShortcuts();
 
 function mountPractice(root,context){
 const $=id=>root.querySelector('#'+id),data=context.rows;let available=[...data];

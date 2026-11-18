@@ -457,6 +457,11 @@ window.ReadIQWordBridge={
 
 // READIQ_PRACTICE_BRIDGE_V1
 window.ReadIQPracticeBridge={
+ // READIQ_READING_PRACTICE_V1
+ readingSelection(){
+  if (!['quarter','para','surah'].includes(readingMode) || !verses.length) return null;
+  return window.ReadIQWordBridge.selection();
+ },
  snapshot(){
   if(!['quarter','para','surah'].includes(readingMode)||!Array.isArray(verses)||!verses.length)throw Error('Open a Quarter, Para or Surah and wait for its verses to load first.');
   const clean=v=>({code:String(v.code),ar:cleanArabicEnd(v.ar),ur:cleanTranslationMarkers(v.ur),en:cleanTranslationMarkers(v.en)});

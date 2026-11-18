@@ -22,9 +22,11 @@ $('wb-message').addEventListener('close',()=>opener?.focus());
 function setBusy(b){$('wb-load').disabled=b;$('wb-load').textContent=b?'Opening…':'Open selection →';$('wb-practice').disabled=b||!active?.rows.length}
 function hide(){++request;root.hidden=true;if($('wb-message').open)$('wb-message').close();reader.hidden=false;document.documentElement.classList.remove('readiq-wbw-open');setBusy(false)}
 // READIQ_PRACTICE_MENU_V1
-window.ReadIQWordByWord={hide,openPractice};
-async function openPractice(){
- if(root.hidden) await openWords(false);
+// READIQ_READING_PRACTICE_V1
+window.ReadIQWordByWord={hide,openPractice,coverage};
+queueMicrotask(() => window.dispatchEvent(new Event('readiq-word-ready')));
+async function openPractice(choice){
+ if (choice || root.hidden) await openWords(false, choice);
  if(!root.hidden && active && !$('wb-practice').disabled) $('wb-practice').click();
 }
 function reveal(){window.ReadIQPractice?.hide();root.hidden=false;reader.hidden=true;document.documentElement.classList.add('readiq-wbw-open');document.querySelectorAll('.file-menu').forEach(m=>m.hidden=true);document.querySelectorAll('[aria-controls$="Menu"]').forEach(b=>b.setAttribute('aria-expanded','false'))}
@@ -33,18 +35,54 @@ for(const id of ['wb-scope','wb-para','wb-quarter','wb-surah'])$(id).onchange=co
 async function json(url){const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error('Content could not be loaded. Please try again.');return response.json()}
 async function words(sheet){if(!sheet.url)return[];if(!cache.has(sheet.url)){const data=await json(sheet.url);if(!Array.isArray(data.words))throw Error('Invalid word content.');cache.set(sheet.url,data.words)}return cache.get(sheet.url)}
 function selection(){return{mode:$('wb-scope').value,para:Number($('wb-para').value),quarter:Number($('wb-quarter').value),surah:Number($('wb-surah').value)}}
+let manifestRequest;
+function manifest(){
+ if (!manifestRequest) {
+  manifestRequest = json('word-by-word/index.json').catch(error => {
+   manifestRequest = null;
+   throw error;
+  });
+ }
+ return manifestRequest;
+}
+function describeSelection(data, choice){
+ if (choice.mode === 'surah') {
+  const surah = data.surahs.find(item => item.number === choice.surah);
+  if (!surah) throw Error('Surah index unavailable.');
+  return {
+   sheets: data.sheets.filter(sheet => surah.sheets.includes(sheet.name)),
+   title: 'Surah ' + choice.surah + ' · ' + (names[choice.surah-1] || ''),
+   expected: surah.expectedVerses,
+   covered: surah.verseCount
+  };
+ }
+ const sheets = data.sheets.filter(sheet => sheet.para === choice.para &&
+  (choice.mode === 'para' || sheet.quarter === choice.quarter));
+ const section = choice.mode === 'para' ? 'All four quarters' :
+  ['First','Second','Third','Fourth'][choice.quarter-1] + ' Quarter';
+ return {
+  sheets,
+  title: 'Para ' + String(choice.para).padStart(2,'0') + ' · ' + section,
+  expected: sheets.reduce((sum, sheet) => sum + sheet.expectedVerses, 0),
+  covered: sheets.reduce((sum, sheet) => sum + sheet.verseCount, 0)
+ };
+}
+async function coverage(choice){
+ const {covered, expected} = describeSelection(await manifest(), choice);
+ return {covered, expected};
+}
 async function load(showPartial = true){
  const ticket=++request,choice=selection();active=null;setBusy(true);$('wb-status').textContent='Opening word meanings…';$('wb-verses').replaceChildren();
  try{
-  const fresh=await json('word-by-word/index.json');if(ticket!==request)return;index=fresh;
-  let sheets,title,expected=0,covered=0;
-  if(choice.mode==='surah'){const s=index.surahs.find(s=>s.number===choice.surah);if(!s)throw Error('Surah index unavailable.');sheets=index.sheets.filter(x=>s.sheets.includes(x.name));title='Surah '+choice.surah+' · '+(names[choice.surah-1]||'');expected=s.expectedVerses;covered=s.verseCount}
-  else{sheets=index.sheets.filter(s=>s.para===choice.para&&(choice.mode==='para'||s.quarter===choice.quarter));title='Para '+String(choice.para).padStart(2,'0')+' · '+(choice.mode==='para'?'All four quarters':['First','Second','Third','Fourth'][choice.quarter-1]+' Quarter');expected=sheets.reduce((n,s)=>n+s.expectedVerses,0);covered=sheets.reduce((n,s)=>n+s.verseCount,0)}
+  const fresh = await manifest();
+  if (ticket !== request) return;
+  index = fresh;
+  const {sheets, title, expected, covered} = describeSelection(index, choice);
   let rows=(await Promise.all(sheets.map(words))).flat();if(choice.mode==='surah')rows=rows.filter(w=>w.surah===choice.surah).sort((a,b)=>a.ayah-b.ayah||a.serial-b.serial);
   if(ticket!==request)return;
   if(!rows.length){$('wb-title').textContent=title;$('wb-status').textContent='Word-by-Word content is not available for this selection yet.';notice('Word-by-Word content coming soon','Word-by-Word content for this section is in preparation. You can open another section to read the available content.');return}
   const pending=sheets.filter(s=>!s.count).map(s=>s.name),partial=covered<expected||pending.length>0;
-  active={rows,title,choice,revision:index.revision,partial};$('wb-title').textContent=title;
+  active={rows,title,choice,revision:index.revision,partial,covered,expected};$('wb-title').textContent=title;
   $('wb-status').textContent=rows.length+' words · '+covered+'/'+expected+' ayat have word entries'+(partial?' · Available content only; this selection is still being prepared.':' · Word entries available for every ayat in this selection.');
   render();
   if(partial && showPartial !== false)notice('More words are on the way.','Insha Allah, the remaining content will be available soon. You can read and practise the '+rows.length+' words already prepared for this selection.');
@@ -65,10 +103,10 @@ function render(){if(!active)return;const container=$('wb-verses');container.rep
 for(const id of ['wb-urdu','wb-english','wb-full-ar','wb-full-ur','wb-full-en'])$(id).onchange=render;
 function font(n){size=Math.max(22,Math.min(48,n));root.style.setProperty('--wb-size',size+'px');$('wb-font').value=size;$('wb-font-value').textContent=size+'px'}
 $('wb-smaller').onclick=()=>font(size-2);$('wb-larger').onclick=()=>font(size+2);$('wb-font-reset').onclick=()=>font(31);$('wb-font').oninput=()=>font(Number($('wb-font').value));
-$('wb-exit').onclick=()=>{hide();document.getElementById('iqPracticeLaunch')?.focus()};$('wb-load').onclick=load;
-async function openWords(showPartial = true){const selection=window.ReadIQWordBridge?.selection();if(selection){$('wb-scope').value=selection.mode;$('wb-para').value=selection.para||1;$('wb-quarter').value=selection.quarter||1;$('wb-surah').value=selection.surah||1}controls();reveal();root.scrollIntoView({block:'start',behavior:'smooth'});await load(showPartial)}
+$('wb-exit').onclick=()=>{hide();document.querySelector('.iq-reading-practice button:last-child:not(:disabled)')?.focus()};$('wb-load').onclick=load;
+async function openWords(showPartial = true, selection = window.ReadIQWordBridge?.selection()){if(selection){$('wb-scope').value=selection.mode;$('wb-para').value=selection.para||1;$('wb-quarter').value=selection.quarter||1;$('wb-surah').value=selection.surah||1}controls();reveal();root.scrollIntoView({block:'start',behavior:'smooth'});await load(showPartial)}
 $('wb-practice').onclick=()=>{if(!active)return;const current=active,langs=['ur','en'].filter(l=>$(l==='ur'?'wb-urdu':'wb-english').checked);if(!langs.length){notice('Choose an answer language.','Select Urdu, English or both, then open Word MCQs & Flashcards.');return}
- const context={title:'Word by Word · '+current.title+(current.partial?' · Available words':''),mode:'word',rows:current.rows,languages:langs,revision:current.revision,sourceId:JSON.stringify(current.choice),onExit(){reveal();root.scrollIntoView({block:'start'})},async extraPool(){const all=(await Promise.all(index.sheets.filter(s=>s.count).map(words))).flat();return all}};
+ const context={title:'Word by Word · '+current.title+(current.partial ? ' · ' + current.covered + ' of ' + current.expected + ' verses available' : ''),mode:'word',rows:current.rows,languages:langs,revision:current.revision,sourceId:JSON.stringify(current.choice),onExit(){reveal();root.scrollIntoView({block:'start'})},async extraPool(){const all=(await Promise.all(index.sheets.filter(s=>s.count).map(words))).flat();return all}};
  try{if(!window.ReadIQPractice?.openContext)throw Error('Please refresh this page to load the practice update.');hide();window.ReadIQPractice.openContext(context)}catch(e){reveal();notice('Practice could not open.',e.message)}
 };
 })();

@@ -523,6 +523,28 @@ html:not(.readiq-mushaf-ready) #content .iq-surah-ar {visibility:hidden;}
  font:650 .9rem/1.5 system-ui,sans-serif;cursor:pointer;
 }
 #content .iq-about-languages button[aria-pressed="true"] {background:light-dark(#e4f3ff,#26465a);}
+
+/* READIQ_READING_PRACTICE_V1 */
+.iq-reading-practice {
+ display:grid;gap:4px;padding:6px 10px;border-radius:10px;
+ border:1px solid light-dark(#d2e5ef,#3c586b);
+ background:light-dark(#f1f8fc,#1e3543);
+ color:light-dark(#173a56,#e0eff8);
+}
+.iq-reading-practice[hidden],.iq-reading-practice small:empty {display:none}
+.iq-reading-practice strong {font:700 .78rem/1.3 system-ui,sans-serif}
+.iq-reading-practice div {display:flex;flex-wrap:wrap;gap:5px}
+.iq-reading-practice button {
+ padding:5px 8px;border:1px solid light-dark(#b7d8e8,#527286);
+ border-radius:7px;color:inherit;background:light-dark(#fff,#294658);
+ font:650 .82rem/1.35 system-ui,sans-serif;cursor:pointer;
+}
+.iq-reading-practice button:disabled {opacity:.62;cursor:default}
+.iq-reading-practice small {font:500 .75rem/1.4 system-ui,sans-serif}
+@media(max-width:600px) {
+ .dochead .iq-reading-practice {flex:1 0 100%;box-sizing:border-box}
+}
+@media print {.iq-reading-practice {display:none}}
 </style><link id="readiq-practice-style" rel="stylesheet" href="practice.css?v=0bf08f6759f7"><link id="readiq-word-style" rel="stylesheet" href="word-by-word.css?v=0a3193248d279500">
 </head>
 <body><header><div class="brand"><div class="brand-logo">☀️</div><div><h1>IRFAN-UL-QURAN <span class="brand-reflect">· READ • REFLECT</span></h1><small>DeTLeng Read IQ</small></div></div><div class="library-anchor"><button class="file-toggle" id="fileToggle" aria-expanded="false" aria-controls="fileMenu">📚 Library <span id="fileMenuCount">(0)</span> ▾</button><!-- READIQ_ABOUT_V1 --><a class="file-toggle readiq-about-link" href="about.html">About</a></div>
@@ -537,9 +559,9 @@ html:not(.readiq-mushaf-ready) #content .iq-surah-ar {visibility:hidden;}
 
 <main><div class="hero"><span><span class="status-dot"></span><span id="status">Opening library…</span></span></div>
 <div class="tab-wrap"><nav class="tabs" id="tabs" aria-label="Library documents"></nav></div><section class="reader"><div class="dochead"><h2 id="documentTitle">Welcome to your reading space</h2><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><input class="search" id="search" type="search" placeholder="Find in opened file…" aria-label="Search within document"><span id="languageSummary" class="language-summary"></span><span class="pill" id="fileCount">0 FILES</span></div></div><article class="content" id="content"><div class="empty"><div class="sun">📖</div><h2>Your reading journey starts here</h2><p>Choose a document from the Library to begin reading.</p></div></article></section><div class="footer">Read at your own pace. Reflect on every verse. · <a href="https://www.detleng.com/" target="_blank" rel="noopener noreferrer">Explore DeTLeng ↗</a></div></main>
-<script defer src="app.js?v=f53b1933ea34efbf"></script>
-<script id="readiq-practice-script" defer src="practice.js?v=81ab39c194b58b47"></script>
-<script id="readiq-word-script" defer src="word-by-word.js?v=b1d30207d3fcf327"></script>
+<script defer src="app.js?v=61e288b460c04dd6"></script>
+<script id="readiq-practice-script" defer src="practice.js?v=98f15cc15a9eb5c3"></script>
+<script id="readiq-word-script" defer src="word-by-word.js?v=c7ae0583b872aa09"></script>
 <script>
 // DETLENG_ALIGNMENT_V1
 (()=>{
