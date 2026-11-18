@@ -225,17 +225,44 @@ renderSurahsMenu();
 // READIQ_ABOUT_READER_V2
 let aboutSource=null;
 // READIQ_ABOUT_LANG_V1
-let aboutLanguage = saved('readiq-about-language','en') === 'ur' ? 'ur' : 'en';
+// READIQ_FURTHER_READING_V1
+const savedAboutLanguage = saved('readiq-about-language','en');
+let aboutLanguage = ['en','ur','further'].includes(savedAboutLanguage) ? savedAboutLanguage : 'en';
+function buildFurtherReading() {
+ const section = document.createElement('section');
+ section.className = 'iq-further-reading';
+ const title = document.createElement('h2');
+ title.textContent = 'مزید مطالعہ / Further Reading';
+ section.append(title);
+ const articles = [
+  ['تعارف عرفان القرآن', 'https://replay.minhaj.tv/urdu/tid/45084/'],
+  ['عرفان القرآن اور جدید سائنسی علوم: دیگر تراجم کے ساتھ ایک تقابلی مطالعہ — شیخ عبدالعزیز دباغ', 'https://www.vision.minhaj.org/urdu/tid/45085/']
+ ];
+ const list = document.createElement('ul');
+ list.lang = 'ur';
+ list.dir = 'rtl';
+ for(const [label,url] of articles){
+  const item = document.createElement('li');
+  const link = document.createElement('a');
+  link.href = url;
+  link.textContent = label;
+  item.append(link);
+  list.append(item);
+ }
+ section.append(list);
+ return section;
+}
 function renderAbout(){content.classList.remove('asma-mode');
  content.classList.add('about-mode');content.replaceChildren();
  const article = aboutSource?.find(item=>item.id===(aboutLanguage==='ur'?'urdu':'english'));
- if(article){
+ if(aboutLanguage==='further')content.append(buildFurtherReading());
+ else if(article){
   const copy = article.cloneNode(true);
   copy.querySelectorAll('.language-label a').forEach(link=>link.remove());
   content.append(copy);
  }
  title.textContent='About Irfan-ul-Quran Read IQ';
- document.getElementById('languageSummary').textContent=aboutLanguage==='ur'?'اردو':'English';
+ document.getElementById('languageSummary').textContent=({ur:'اردو',en:'English',further:'Further Reading'})[aboutLanguage];
  document.getElementById('fileCount').textContent='ABOUT';
  document.getElementById('status').textContent='About Read IQ';
  highlight();
@@ -245,7 +272,7 @@ async function openAbout(){window.ReadIQWordByWord?.hide();window.ReadIQPractice
  setFileMenu(false);showParaMenu(false);showSurahMenu(false);tools(false);
  title.textContent='About Irfan-ul-Quran Read IQ';content.textContent='Opening About…';
  try{
-  if(!aboutSource){const r=await fetch('about.html',{cache:'no-store'});if(!r.ok)throw Error('About page unavailable');const doc=new DOMParser().parseFromString(await r.text(),'text/html');const articles=[...doc.querySelectorAll('article.language-document')];if(articles.length!==2)throw Error('About content could not be read');aboutSource=articles;}
+  if(aboutLanguage!=='further'&&!aboutSource){const r=await fetch('about.html',{cache:'no-store'});if(!r.ok)throw Error('About page unavailable');const doc=new DOMParser().parseFromString(await r.text(),'text/html');const articles=[...doc.querySelectorAll('article.language-document')];if(articles.length!==2)throw Error('About content could not be read');aboutSource=articles;}
   if(request!==token)return;renderAbout();
  }catch(e){if(request===token)content.textContent=e.message;}
 }
@@ -279,10 +306,10 @@ if(aboutLink){
   document.querySelectorAll('[aria-controls$="Menu"]').forEach(control=>control.setAttribute('aria-expanded','false'));
   showAboutLanguages(open);
  };
- for(const [lang,label] of [['en','English'],['ur','اردو']]){
+ for(const [lang,label] of [['en','English'],['ur','اردو'],['further','مزید مطالعہ / Further Reading']]){
   const choice = document.createElement('button');
   choice.type = 'button';
-  choice.lang = lang;
+  if(lang!=='further')choice.lang = lang;
   choice.textContent = label;
   choice.onclick = ()=>{
    aboutLanguage = lang;
