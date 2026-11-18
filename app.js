@@ -228,14 +228,25 @@ let aboutSource=null;
 // READIQ_FURTHER_READING_V1
 // READIQ_FURTHER_LINKS_V1
 const savedAboutLanguage = saved('readiq-about-language','en');
-let aboutLanguage = ['en','ur','further'].includes(savedAboutLanguage) ? savedAboutLanguage : 'en';
+// READIQ_ABOUT_TOPICS_V1
+let aboutLanguage = savedAboutLanguage === 'ur' ? 'ur' : 'en';
+const aboutTopics = {
+ irfan: {en:'Irfan-ul-Quran & Professor Dr. Muhammad Tahir-ul-Qadri',ur:'عرفان القرآن اور پروفیسر ڈاکٹر محمد طاہر القادری'},
+ readiq: {en:'Read IQ by DeTLeng',ur:'ریڈ آئی کیو از ڈیٹلینگ'},
+ further: {en:'Further Reading',ur:'مزید مطالعہ'}
+};
+const savedAboutTopic = saved('readiq-about-topic',savedAboutLanguage==='further'?'further':'readiq');
+let aboutTopic = Object.hasOwn(aboutTopics,savedAboutTopic) ? savedAboutTopic : 'readiq';
 // READIQ_FURTHER_TABS_V1
 function buildFurtherReading() {
  const section = document.createElement('section');
  section.className = 'iq-further-reading';
  const title = document.createElement('h2');
- title.textContent = 'مزید مطالعہ / Further Reading';
+ title.textContent = aboutLanguage==='ur'?'عرفان القرآن سے متعلق مضامین':'Articles on Irfan-ul-Quran';
  section.append(title);
+ const note = document.createElement('p');
+ note.textContent = aboutLanguage==='ur'?'دونوں مضامین اردو میں ہیں اور نئی ٹیب میں کھلتے ہیں۔':'Both articles are in Urdu and open in a new tab.';
+ section.append(note);
  const articles = [
   ['تعارف عرفان القرآن', 'https://www.irfan-ul-quran.com/urdu/tid/45084/%D8%AA%D8%B9%D8%A7%D8%B1%D9%81-%D8%B9%D8%B1%D9%81%D8%A7%D9%86-%D8%A7%D9%84%D9%82%D8%B1%D8%A2%D9%86.html'],
   ['عرفان القرآن اور جدید سائنسی علوم: دیگر تراجم کے ساتھ ایک تقابلی مطالعہ — شیخ عبدالعزیز دباغ', 'https://www.irfan-ul-quran.com/urdu/tid/45085/%D8%B9%D8%B1%D9%81%D8%A7%D9%86-%D8%A7%D9%84%D9%82%D8%B1%D8%A2%D9%86-%D8%A7%D9%88%D8%B1-%D8%AC%D8%AF%DB%8C%D8%AF-%D8%B3%D8%A7%D8%A6%D9%86%D8%B3%DB%8C-%D8%B9%D9%84%D9%88%D9%85:-%D8%AF%DB%8C%DA%AF%D8%B1-%D8%AA%D8%B1%D8%A7%D8%AC%D9%85-%DA%A9%DB%8C%D8%B3%D8%A7%D8%AA%DA%BE-%D8%A7%DB%8C%DA%A9-%D8%AA%D9%82%D8%A7%D8%A8%D9%84%DB%8C-%D9%85%D8%B7%D8%A7%D9%84%D8%B9%DB%81-%D8%B4%DB%8C%D8%AE-%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D8%B9%D8%B2%DB%8C%D8%B2-%D8%AF%D8%A8%D8%A7%D8%BA.html']
@@ -256,17 +267,57 @@ function buildFurtherReading() {
  section.append(list);
  return section;
 }
-function renderAbout(){content.classList.remove('asma-mode');
- content.classList.add('about-mode');content.replaceChildren();
- const article = aboutSource?.find(item=>item.id===(aboutLanguage==='ur'?'urdu':'english'));
- if(aboutLanguage==='further')content.append(buildFurtherReading());
- else if(article){
-  const copy = article.cloneNode(true);
-  copy.querySelectorAll('.language-label a').forEach(link=>link.remove());
-  content.append(copy);
+function renderAbout(){
+ content.classList.remove('asma-mode');
+ content.classList.add('about-mode');
+ content.replaceChildren();
+ const topicTitle = aboutTopics[aboutTopic][aboutLanguage];
+ title.textContent = topicTitle;
+ const languages = document.createElement('div');
+ languages.className = 'iq-about-languages';
+ languages.setAttribute('role','group');
+ languages.setAttribute('aria-label','About language');
+ for(const [lang,label] of [['en','English'],['ur','اردو']]){
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.lang = lang;
+  button.textContent = label;
+  button.setAttribute('aria-pressed',String(lang===aboutLanguage));
+  button.onclick = ()=>{
+   aboutLanguage = lang;
+   save('readiq-about-language',lang);
+   renderAbout();
+   content.querySelector('.iq-about-languages [aria-pressed="true"]')?.focus();
+  };
+  languages.append(button);
  }
- title.textContent='About Irfan-ul-Quran Read IQ';
- document.getElementById('languageSummary').textContent=({ur:'اردو',en:'English',further:'Further Reading'})[aboutLanguage];
+ content.append(languages);
+ if(aboutTopic==='further')content.append(buildFurtherReading());
+ else{
+  const article = aboutSource?.find(item=>item.id===(aboutLanguage==='ur'?'urdu':'english'));
+  if(article){
+   const copy = article.cloneNode(false);
+   const topics = aboutTopic==='irfan' ? [4,5,9] : [1,2,3,6,8];
+   for(const id of topics){
+    const section = article.querySelector('#'+aboutLanguage+'-topic-'+id);
+    if(section)copy.append(section.cloneNode(true));
+   }
+   if(aboutTopic==='readiq'){
+    const section = document.createElement('section');
+    section.className = 'topic';
+    const heading = document.createElement('h3');
+    const paragraph = document.createElement('p');
+    heading.textContent = aboutLanguage==='ur'?'مشق اور مزید سہولتیں':'Practice and reading tools';
+    paragraph.textContent = aboutLanguage==='ur'
+     ? 'Explore سے آیت بہ آیت یا لفظ بہ لفظ سوالات اور فلیش کارڈز کھولیے۔ ترتیبات سے زبان، حروف کا حجم اور متن کی سیدھ منتخب کیجیے۔ سورت کے ساتھ معلومات کے نشان سے تفصیل، اور اسماء کے حصے سے اسمائے حسنیٰ اور اسمائے نبی ﷺ دیکھیے۔'
+     : 'Use Explore to open verse-by-verse or word-by-word MCQs and flashcards. Adjust languages, text size and alignment in Settings. Open a Surah’s information panel for its details or visit Asma to browse the names.';
+    section.append(heading,paragraph);
+    copy.prepend(section);
+   }
+   content.append(copy);
+  }
+ }
+ document.getElementById('languageSummary').textContent=aboutLanguage==='ur'?'اردو':'English';
  document.getElementById('fileCount').textContent='ABOUT';
  document.getElementById('status').textContent='About Read IQ';
  highlight();
@@ -276,7 +327,7 @@ async function openAbout(){window.ReadIQWordByWord?.hide();window.ReadIQPractice
  setFileMenu(false);showParaMenu(false);showSurahMenu(false);tools(false);
  title.textContent='About Irfan-ul-Quran Read IQ';content.textContent='Opening About…';
  try{
-  if(aboutLanguage!=='further'&&!aboutSource){const r=await fetch('about.html',{cache:'no-store'});if(!r.ok)throw Error('About page unavailable');const doc=new DOMParser().parseFromString(await r.text(),'text/html');const articles=[...doc.querySelectorAll('article.language-document')];if(articles.length!==2)throw Error('About content could not be read');aboutSource=articles;}
+  if(aboutTopic!=='further'&&!aboutSource){const r=await fetch('about.html',{cache:'no-store'});if(!r.ok)throw Error('About page unavailable');const doc=new DOMParser().parseFromString(await r.text(),'text/html');const articles=[...doc.querySelectorAll('article.language-document')];if(articles.length!==2)throw Error('About content could not be read');aboutSource=articles;}
   if(request!==token)return;renderAbout();
  }catch(e){if(request===token)content.textContent=e.message;}
 }
@@ -285,7 +336,7 @@ const aboutLanguageMenu = document.createElement('div');
 aboutLanguageMenu.id = 'iqAboutLanguageMenu';
 aboutLanguageMenu.className = 'file-menu';
 aboutLanguageMenu.hidden = true;
-aboutLanguageMenu.setAttribute('aria-label','About language');
+aboutLanguageMenu.setAttribute('aria-label','About topics');
 function showAboutLanguages(open) {
  aboutLanguageMenu.hidden = !open;
  aboutLink?.setAttribute('aria-expanded',String(open));
@@ -310,14 +361,13 @@ if(aboutLink){
   document.querySelectorAll('[aria-controls$="Menu"]').forEach(control=>control.setAttribute('aria-expanded','false'));
   showAboutLanguages(open);
  };
- for(const [lang,label] of [['en','English'],['ur','اردو'],['further','مزید مطالعہ / Further Reading']]){
+ for(const [topic,labels] of Object.entries(aboutTopics)){
   const choice = document.createElement('button');
   choice.type = 'button';
-  if(lang!=='further')choice.lang = lang;
-  choice.textContent = label;
+  choice.textContent = topic==='further'?'مزید مطالعہ / Further Reading':labels.en;
   choice.onclick = ()=>{
-   aboutLanguage = lang;
-   save('readiq-about-language',lang);
+   aboutTopic = topic;
+   save('readiq-about-topic',topic);
    showAboutLanguages(false);
    history.replaceState(null,'','#about');
    (document.getElementById('iqExploreToggle') || aboutLink).focus();
