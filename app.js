@@ -78,7 +78,7 @@ function appendParaTitle() {
  content.append(card);
 }
 
-function render(){if(readingMode==='asma'){renderAsma();return}content.classList.remove('asma-mode');if(readingMode==='about'){renderAbout();return}content.classList.remove('about-mode');const langs=selectedLanguages();content.replaceChildren();document.getElementById('languageSummary').textContent=langs.map(k=>({ar:'Arabic',ur:'Urdu',en:'English'})[k]).join(' · ');document.getElementById('fileCount').textContent=verses.length+' VERSES';
+function render(){updateLanguageRow();if(readingMode==='asma'){renderAsma();return}content.classList.remove('asma-mode');if(readingMode==='about'){renderAbout();return}content.classList.remove('about-mode');const langs=selectedLanguages();content.replaceChildren();document.getElementById('languageSummary').textContent=langs.map(k=>({ar:'Arabic',ur:'Urdu',en:'English'})[k]).join(' · ');document.getElementById('fileCount').textContent=verses.length+' VERSES';
 if(window.ReadIQBismillah.applies(verses[0]?.code,true))content.append(window.ReadIQBismillah.block());
 appendParaTitle();
 if(!langs.length){const p=document.createElement('p');p.className='empty';p.textContent='Choose Arabic, Urdu or English from Library.';content.append(p);return}
@@ -105,10 +105,7 @@ const paraNames=[
 const paraToggle=document.createElement('button');paraToggle.type='button';paraToggle.className='file-toggle';paraToggle.id='paraToggle';paraToggle.textContent='📖 Paras ▾';paraToggle.setAttribute('aria-expanded','false');paraToggle.setAttribute('aria-controls','paraMenu');fileToggle.parentElement.append(paraToggle);
 const paraMenu=document.createElement('div');paraMenu.className='file-menu';paraMenu.id='paraMenu';paraMenu.hidden=true;paraMenu.setAttribute('aria-label','Complete Paras');
 const paraBar=document.createElement('div');paraBar.className='library-toolbar';const paraHeading=document.createElement('strong');paraHeading.textContent='📖 Paras';paraBar.append(paraHeading);paraMenu.append(paraBar);
-const paraLanguages=document.createElement('fieldset');paraLanguages.className='language-picks';const paraLegend=document.createElement('legend');paraLegend.textContent='Display languages';paraLanguages.append(paraLegend);
-const paraChecks=[];
-checks.forEach(original=>{const label=document.createElement('label'),c=document.createElement('input');c.type='checkbox';c.checked=original.checked;c.setAttribute('aria-label',({ar:'Arabic',ur:'Urdu',en:'English'})[original.dataset.language]);label.append(c,' '+({ar:'Arabic',ur:'Urdu',en:'English'})[original.dataset.language]);paraLanguages.append(label);paraChecks.push(c);c.onchange=()=>{original.checked=c.checked;original.dispatchEvent(new Event('change'))};original.addEventListener('change',()=>{c.checked=original.checked})});
-paraMenu.append(paraLanguages);const paraList=document.createElement('div');paraList.className='para-list';paraMenu.append(paraList);document.body.append(paraMenu);
+const paraList=document.createElement('div');paraList.className='para-list';paraMenu.append(paraList);document.body.append(paraMenu);
 function positionParas(){const box=paraToggle.getBoundingClientRect(),width=Math.min(560,innerWidth-28);paraMenu.style.left=Math.max(14,Math.min(box.left,innerWidth-width-14))+'px';paraMenu.style.top=Math.ceil(header.getBoundingClientRect().bottom)+6+'px'}
 function showParaMenu(open){paraMenu.hidden=!open;paraToggle.setAttribute('aria-expanded',String(open));if(open){setFileMenu(false);tools(false);positionParas()}}
 paraToggle.onclick=()=>showParaMenu(paraMenu.hidden);
@@ -133,9 +130,7 @@ let currentSurah=Number(saved('readiq-surah',1));
 const surahToggle=document.createElement('button');surahToggle.type='button';surahToggle.className='file-toggle';surahToggle.id='surahToggle';surahToggle.textContent='📜 Surahs ▾';surahToggle.setAttribute('aria-expanded','false');surahToggle.setAttribute('aria-controls','surahMenu');fileToggle.parentElement.append(surahToggle);
 const surahMenu=document.createElement('div');surahMenu.className='file-menu';surahMenu.id='surahMenu';surahMenu.hidden=true;surahMenu.setAttribute('aria-label','Complete Surahs');
 const surahBar=document.createElement('div');surahBar.className='library-toolbar';const surahHeading=document.createElement('strong');surahHeading.textContent='📜 Surahs';surahBar.append(surahHeading);surahMenu.append(surahBar);
-const surahLanguages=document.createElement('fieldset');surahLanguages.className='language-picks';const surahLegend=document.createElement('legend');surahLegend.textContent='Display languages';surahLanguages.append(surahLegend);
-checks.forEach(original=>{const label=document.createElement('label'),c=document.createElement('input');c.type='checkbox';c.checked=original.checked;const name=({ar:'Arabic',ur:'Urdu',en:'English'})[original.dataset.language];c.setAttribute('aria-label',name);label.append(c,' '+name);surahLanguages.append(label);c.onchange=()=>{original.checked=c.checked;original.dispatchEvent(new Event('change'))};original.addEventListener('change',()=>{c.checked=original.checked})});
-surahMenu.append(surahLanguages);const surahList=document.createElement('div');surahList.className='surah-list';surahMenu.append(surahList);document.body.append(surahMenu);
+const surahList=document.createElement('div');surahList.className='surah-list';surahMenu.append(surahList);document.body.append(surahMenu);
 function positionSurahs(){const box=surahToggle.getBoundingClientRect(),width=Math.min(560,innerWidth-28);surahMenu.style.left=Math.max(14,Math.min(box.left,innerWidth-width-14))+'px';surahMenu.style.top=Math.ceil(header.getBoundingClientRect().bottom)+6+'px'}
 function showSurahMenu(open){surahMenu.hidden=!open;surahToggle.setAttribute('aria-expanded',String(open));if(open){setFileMenu(false);showParaMenu(false);tools(false);positionSurahs()}}
 surahToggle.onclick=()=>showSurahMenu(surahMenu.hidden);
@@ -168,7 +163,7 @@ function renderAbout(){content.classList.remove('asma-mode');
  highlight();
 }
 async function openAbout(){window.ReadIQWordByWord?.hide();window.ReadIQPractice?.hide();
- const request=++token;readingMode='about';search.value='';
+ const request=++token;readingMode='about';updateLanguageRow();search.value='';
  setFileMenu(false);showParaMenu(false);showSurahMenu(false);tools(false);
  title.textContent='About Irfan-ul-Quran Read IQ';content.textContent='Opening About…';
  try{
@@ -190,10 +185,7 @@ function clearAsmaHash(){if(/^#asma-(allah|nabi)$/.test(location.hash))history.r
 const asmaToggle=document.createElement('button');asmaToggle.type='button';asmaToggle.id='asmaToggle';asmaToggle.className='file-toggle';asmaToggle.textContent='✧ اسماء ▾';asmaToggle.lang='ur';asmaToggle.setAttribute('aria-expanded','false');asmaToggle.setAttribute('aria-controls','asmaMenu');fileToggle.parentElement.append(asmaToggle);
 const asmaMenu=document.createElement('div');asmaMenu.id='asmaMenu';asmaMenu.className='file-menu';asmaMenu.hidden=true;asmaMenu.setAttribute('aria-label','Names reading');
 const asmaToolbar=document.createElement('div');asmaToolbar.className='library-toolbar';const asmaHeading=document.createElement('strong');asmaHeading.lang='ur';asmaHeading.textContent='اسماء';asmaToolbar.append(asmaHeading);asmaMenu.append(asmaToolbar);
-const asmaPicks=document.createElement('fieldset');asmaPicks.className='language-picks';const asmaLegend=document.createElement('legend');asmaLegend.textContent='Display options';asmaPicks.append(asmaLegend);
 const asmaLabels={ar:'Arabic',ur:'Urdu',en:'English',pronunciation:'Pronunciation'};
-for(const k of asmaFields){const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.dataset.asmaField=k;check.checked=asmaChoice.includes(k);label.append(check,' '+asmaLabels[k]);asmaPicks.append(label);check.onchange=()=>{asmaChoice=[...asmaPicks.querySelectorAll('input:checked')].map(c=>c.dataset.asmaField);save('readiq-asma-fields',asmaChoice);if(readingMode==='asma')renderAsma()}}
-asmaMenu.append(asmaPicks);
 const asmaOptions=document.createElement('div');asmaOptions.className='asma-options';
 for(const [key,urdu,en] of [['allah','اسماء الحسنیٰ','99 Names of Allah'],['nabi','اسماء النبی ﷺ','Asma-ul-Nabi ﷺ']]){const button=document.createElement('button');button.type='button';button.className='asma-option';button.dataset.asmaKind=key;const ar=document.createElement('strong');ar.lang='ur';ar.dir='rtl';ar.textContent=urdu;const sub=document.createElement('small');sub.textContent=en;button.append(ar,sub);button.onclick=()=>{showAsmaMenu(false);openAsma(key);window.scrollTo({top:0,behavior:'smooth'})};asmaOptions.append(button)}
 asmaMenu.append(asmaOptions);document.body.append(asmaMenu);
@@ -204,7 +196,23 @@ for(const other of [fileToggle,paraToggle,surahToggle,settings,document.querySel
 document.addEventListener('pointerdown',e=>{if(!asmaMenu.contains(e.target)&&!asmaToggle.contains(e.target))showAsmaMenu(false)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!asmaMenu.hidden){showAsmaMenu(false);asmaToggle.focus()}});
 window.addEventListener('resize',positionAsma);new ResizeObserver(positionAsma).observe(header);
+// READIQ_COMMON_LANGUAGES_V1
+const readingLanguages = document.getElementById('readingLanguages');
+const pronunciationOption = document.getElementById('pronunciationOption');
+const includePronunciation = document.getElementById('includePronunciation');
+includePronunciation.checked = asmaChoice.includes('pronunciation');
+includePronunciation.onchange = () => {
+ save('readiq-asma-fields', includePronunciation.checked ? ['pronunciation'] : []);
+ renderAsma();
+};
+function updateLanguageRow() {
+ readingLanguages.hidden = readingMode === 'about';
+ pronunciationOption.hidden = readingMode !== 'asma';
+}
 function renderAsma(){
+ updateLanguageRow();
+ const asmaChoice = selectedLanguages();
+ if(includePronunciation.checked) asmaChoice.push('pronunciation');
  content.classList.remove('about-mode');content.classList.add('asma-mode');content.replaceChildren();
  const rows=asmaData[asmaKind],isNabi=asmaKind==='nabi';
  title.textContent=isNabi?'اسماء النبی ﷺ · Asma-ul-Nabi ﷺ':'اسماء الحسنیٰ · 99 Names of Allah';
@@ -212,7 +220,7 @@ function renderAsma(){
  document.getElementById('fileCount').textContent=rows.length+' NAMES';
  document.getElementById('status').textContent=rows.length+' names · '+(isNabi?'Asma-ul-Nabi ﷺ':'Asma-ul-Husna');
  asmaOptions.querySelectorAll('button').forEach(b=>{b.classList.toggle('active',b.dataset.asmaKind===asmaKind);b.setAttribute('aria-pressed',String(b.dataset.asmaKind===asmaKind))});
- if(!asmaChoice.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='Select Arabic, Urdu, English or Pronunciation from the Asma menu.';content.append(empty);return}
+ if(!asmaChoice.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='Select Arabic, Urdu, English or Pronunciation from the display language row.';content.append(empty);return}
  const list=document.createElement('div');list.className='asma-cards';
  rows.forEach((name,i)=>{const card=document.createElement('section');card.className='asma-card';const number=document.createElement('span');number.className='asma-number';number.dir='ltr';number.textContent=String(i+1);card.append(number);
  // Arabic stays central. The number aligns with the first displayed line, even without Arabic.
@@ -284,6 +292,7 @@ window.ReadIQBismillah = (() => {
  return { applies, block };
 })();
 
+updateLanguageRow();
 refresh();setInterval(refresh,30000);
 
 // READIQ_VERSE_CIRCLE_V1
