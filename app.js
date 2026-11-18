@@ -49,33 +49,30 @@ const paraCardDetails = [
  ["Tabarakalladhi", "Blessed is He who", "Al-Mulk to Al-Mursalat · 11 Surahs"],
  ["‘Amma", "About what?", "An-Naba to An-Nas · 37 Surahs"]
 ];
-function appendParaTitle() {
+// READIQ_PARA_TEAL_V1
+function renderParaTitle() {
  if (readingMode !== 'para') return;
  const index = Number(currentPara) - 1;
  const names = paraNames[index];
  const details = paraCardDetails[index];
  if (!names || !details) return;
  const [romanName, meaning, coverage] = details;
- const card = document.createElement('section');
- card.className = 'iq-para-title';
- const heading = document.createElement('h2');
- heading.className = 'iq-para-head';
- const number = document.createElement('span');
- number.className = 'iq-para-number';
- number.textContent = 'Para ' + String(currentPara).padStart(2,'0');
+ const paraLabel = 'Para ' + String(currentPara).padStart(2,'0');
+ const name = document.createElement('span');
+ name.className = 'iq-para-banner-name';
+ name.textContent = paraLabel + ' · ' + romanName;
  const arabic = document.createElement('span');
  arabic.className = 'iq-para-ar';
  arabic.lang = 'ar';
  arabic.dir = 'rtl';
  arabic.textContent = names[0];
- heading.append(number,arabic,romanName);
- const detail = document.createElement('div');
- detail.className = 'iq-para-detail';
- const surahs = document.createElement('strong');
- surahs.textContent = coverage;
- detail.append(meaning,surahs);
- card.append(heading,detail);
- content.append(card);
+ const meta = document.createElement('span');
+ meta.className = 'iq-para-banner-meta';
+ meta.textContent = 'Complete Para' + (verses.length ? ' · ' + verses.length + ' verses' : '');
+ const detail = document.createElement('span');
+ detail.className = 'iq-para-banner-detail';
+ detail.textContent = [meaning, coverage].filter(Boolean).join(' · ');
+ title.replaceChildren(arabic, name, meta, detail);
 }
 
 
@@ -139,7 +136,7 @@ function appendSurahHeading(code) {
 function render(){updateLanguageRow();if(readingMode==='asma'){renderAsma();return}content.classList.remove('asma-mode');if(readingMode==='about'){renderAbout();return}content.classList.remove('about-mode');const langs=selectedLanguages();content.replaceChildren();document.getElementById('languageSummary').textContent=langs.map(k=>({ar:'Arabic',ur:'Urdu',en:'English'})[k]).join(' · ');document.getElementById('fileCount').textContent=verses.length+' VERSES';
 appendSurahHeading(verses[0]?.code);
 if(window.ReadIQBismillah.applies(verses[0]?.code,true))content.append(window.ReadIQBismillah.block());
-appendParaTitle();
+renderParaTitle();
 if(!langs.length){const p=document.createElement('p');p.className='empty';p.textContent='Choose Arabic, Urdu or English from Library.';content.append(p);return}
 if(!verses.length){const p=document.createElement('p');p.className='empty';p.textContent='Choose a quarter from Library to begin reading.';content.append(p);return}
 for(const [index,v] of verses.entries()){
@@ -186,7 +183,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!paraMenu.hidden){s
 window.addEventListener('resize',positionParas);new ResizeObserver(positionParas).observe(header);
 function renderParasMenu(){paraList.replaceChildren();paraNames.forEach(([arabic,roman],i)=>{const para=i+1;const complete=[1,2,3,4].every(q=>catalogue.files.some(f=>f.para===para&&f.quarter===q));const b=document.createElement('button');b.type='button';b.className='para-option'+(readingMode==='para'&&currentPara===para?' active':'');b.disabled=!complete;const top=document.createElement('span');top.className='para-option-title';const num=document.createElement('span');num.textContent=String(para).padStart(2,'0')+' · ';const ar=document.createElement('span');ar.lang='ar';ar.dir='rtl';ar.textContent=arabic;top.append(num,ar);const bottom=document.createElement('small');bottom.textContent=roman;b.append(top,bottom);if(!complete)b.title='All four quarter files are required';b.onclick=()=>{showParaMenu(false);openPara(para);window.scrollTo({top:0,behavior:'smooth'})};paraList.append(b)})}
 async function openPara(para){window.ReadIQWordByWord?.hide();window.ReadIQPractice?.hide();clearAsmaHash();
- const n=++token;readingMode='para';currentPara=para;selected={para,id:'para-'+para};save('readiq-mode','para');save('readiq-para',para);renderLibrary();renderParasMenu();renderSurahsMenu();verses=[];search.value='';title.textContent='Para-'+String(para).padStart(2,'0')+' · '+(paraNames[para-1]?.[0]||'')+' · Complete Para';content.replaceChildren();appendParaTitle();content.append('Opening all four quarters…');document.getElementById('fileCount').textContent='0 VERSES';
+ const n=++token;readingMode='para';currentPara=para;selected={para,id:'para-'+para};save('readiq-mode','para');save('readiq-para',para);renderLibrary();renderParasMenu();renderSurahsMenu();verses=[];search.value='';renderParaTitle();content.replaceChildren();content.append('Opening all four quarters…');document.getElementById('fileCount').textContent='0 VERSES';
  try{
   const files=[1,2,3,4].map(q=>catalogue.files.find(f=>f.para===para&&f.quarter===q));if(files.some(f=>!f))throw Error('This Para needs all four quarter files.');
   const parts=await Promise.all(files.map(async f=>{const response=await fetch(f.url,{cache:'no-store'});if(!response.ok)throw Error('Cannot open '+f.label);const data=await response.json();if(!Array.isArray(data.verses))throw Error('Invalid quarter content');return data.verses}));
@@ -467,7 +464,10 @@ window.ReadIQPracticeBridge={
   const clean=v=>({code:String(v.code),ar:cleanArabicEnd(v.ar),ur:cleanTranslationMarkers(v.ur),en:cleanTranslationMarkers(v.en)});
   const rows=verses.map(clean);
   if(rows.some(v=>!v.code||!v.ar||!v.ur||!v.en))throw Error('Some verse fields are missing. Practice cannot start with incomplete content.');
-  return {title:title.textContent,mode:readingMode,rows,languages:selectedLanguages().filter(k=>k==='ur'||k==='en'),revision,sourceId:selected?.id||title.textContent,
+  const practiceTitle = readingMode === 'para'
+   ? 'Para-' + String(currentPara).padStart(2,'0') + ' · ' + paraNames[currentPara-1][0] + ' · Complete Para'
+   : title.textContent;
+  return {title:practiceTitle,mode:readingMode,rows,languages:selectedLanguages().filter(k=>k==='ur'||k==='en'),revision,sourceId:selected?.id||title.textContent,
    async extraPool(languages){
     const extras=[],seen=new Set(rows.map(v=>languages.map(l=>v[l].normalize('NFC').replace(/\s+/g,' ').trim()).join('\u0001')));
     const files=[...catalogue.files];for(let i=files.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[files[i],files[j]]=[files[j],files[i]]}
