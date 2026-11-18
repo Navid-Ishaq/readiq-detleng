@@ -375,21 +375,50 @@ html.readiq-wbw-open #readingLanguages {display:none!important;}
 #iqPracticeMenu button:is(:hover,:focus-visible){background:light-dark(#e4f3ff,#26465a);}
 #iqPracticeMenu button:disabled{opacity:.5;cursor:default;}
 /* READIQ_WORD_NAV_V1 */
+
+/* READIQ_SETTINGS_PANEL_V1 */
+header #mobileToolsButton {
+ display:grid;place-items:center;width:42px;height:42px;padding:0;
+ border:1px solid #bcdef1;border-radius:11px;font-size:22px;
+ background:light-dark(#eaf6ff,#213f53);color:light-dark(#176b9a,#c8eaff);
+ cursor:pointer;
+}
+header #mobileToolsButton[aria-expanded="true"] {
+ background:light-dark(#d4ecfc,#2d536a);
+}
+#readingSettingsPanel {
+ position:absolute;top:calc(100% + 6px);right:clamp(8px,3vw,40px);
+ width:min(670px,calc(100vw - 16px));max-height:min(65dvh,440px);
+ overflow:auto;padding:12px;box-sizing:border-box;
+ background:light-dark(#fbfdff,#192e3a);border:1px solid light-dark(#cfe3f2,#466373);
+ border-radius:14px;box-shadow:0 12px 32px #153e592e;
+}
+header #readingSettingsPanel .controls {
+ display:flex;flex-wrap:wrap;width:100%;box-sizing:border-box;
+ margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;
+}
+#readingSettingsPanel #readingLanguages {margin-top:8px;}
+#readingSettingsPanel[hidden],
+html.readiq-practice-open #readingSettingsPanel,
+html.readiq-wbw-open #readingSettingsPanel,
+html.readiq-practice-open header #mobileToolsButton,
+html.readiq-wbw-open header #mobileToolsButton {display:none!important;}
+@media print{header #mobileToolsButton,#readingSettingsPanel{display:none!important;}}
 </style><link id="readiq-practice-style" rel="stylesheet" href="practice.css?v=0bf08f6759f7"><link id="readiq-word-style" rel="stylesheet" href="word-by-word.css?v=0a3193248d279500">
 </head>
 <body><header><div class="brand"><div class="brand-logo">☀️</div><div><h1>IRFAN-UL-QURAN <span class="brand-reflect">· READ • REFLECT</span></h1><small>DeTLeng Read IQ</small></div></div><div class="library-anchor"><button class="file-toggle" id="fileToggle" aria-expanded="false" aria-controls="fileMenu">📚 Library <span id="fileMenuCount">(0)</span> ▾</button><!-- READIQ_ABOUT_V1 --><a class="file-toggle readiq-about-link" href="about.html">About</a></div>
-<button type="button" class="mobile-tools-toggle" id="mobileToolsButton" aria-label="Reading settings" aria-controls="readingTools" aria-expanded="false">⚙</button><div class="controls" id="readingTools"><span class="control-label">FONT SIZE</span><button class="size-btn" id="minus" title="Smaller text">−</button><input type="range" id="fontSlider" min="18" max="72" step="1" aria-label="Font size"><button class="size-btn" id="plus" title="Larger text">+</button><span class="font-chip" id="fontValue">31px</span><button class="action" id="reset">Reset</button><button class="action" id="fullscreen">⛶ Full screen</button></div><div id="readingLanguages" role="group" aria-label="Display languages">
+<button type="button" class="mobile-tools-toggle" id="mobileToolsButton" aria-label="Reading settings" aria-controls="readingSettingsPanel" aria-expanded="false" title="Reading settings">⚙</button><div id="readingSettingsPanel" role="group" aria-label="Reading settings" hidden><div class="controls" id="readingTools"><span class="control-label">FONT SIZE</span><button class="size-btn" id="minus" title="Smaller text">−</button><input type="range" id="fontSlider" min="18" max="72" step="1" aria-label="Font size"><button class="size-btn" id="plus" title="Larger text">+</button><span class="font-chip" id="fontValue">31px</span><button class="action" id="reset">Reset</button><button class="action" id="fullscreen">⛶ Full screen</button></div><div id="readingLanguages" role="group" aria-label="Display languages">
 <span>Display languages</span>
 <label><input type="checkbox" data-language="ar" checked> Arabic</label>
 <label><input type="checkbox" data-language="ur" checked> Urdu</label>
 <label><input type="checkbox" data-language="en" checked> English</label>
 <label id="pronunciationOption" hidden><input type="checkbox" id="includePronunciation"> Pronunciation</label>
-</div></header>
+</div></div></header>
 <div class="file-menu" id="fileMenu" hidden aria-label="Reading library"><div class="library-toolbar"><strong>📚 Library</strong></div><div class="library-list" id="fileCards"></div></div>
 
 <main><div class="hero"><span><span class="status-dot"></span><span id="status">Opening library…</span></span></div>
 <div class="tab-wrap"><nav class="tabs" id="tabs" aria-label="Library documents"></nav></div><section class="reader"><div class="dochead"><h2 id="documentTitle">Welcome to your reading space</h2><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><input class="search" id="search" type="search" placeholder="Find in opened file…" aria-label="Search within document"><span id="languageSummary" class="language-summary"></span><span class="pill" id="fileCount">0 FILES</span></div></div><article class="content" id="content"><div class="empty"><div class="sun">📖</div><h2>Your reading journey starts here</h2><p>Choose a document from the Library to begin reading.</p></div></article></section><div class="footer">Read at your own pace. Reflect on every verse. · <a href="https://www.detleng.com/" target="_blank" rel="noopener noreferrer">Explore DeTLeng ↗</a></div></main>
-<script defer src="app.js?v=e90cc7f2771577ea"></script>
+<script defer src="app.js?v=0a229c781a51d13a"></script>
 <script id="readiq-practice-script" defer src="practice.js?v=fac17d477ecfbf7c"></script>
 <script id="readiq-word-script" defer src="word-by-word.js?v=fab5c657ffdfd3ba"></script>
 <script>

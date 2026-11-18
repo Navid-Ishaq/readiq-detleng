@@ -94,7 +94,18 @@ let font=Number(saved('readiq-font',31));if(!Number.isFinite(font))font=31;
 function setFont(v){font=Math.max(18,Math.min(72,Number(v)));document.documentElement.style.setProperty('--size',font+'px');slider.value=font;fontValue.textContent=font+'px';save('readiq-font',font)}
 setFont(font);slider.oninput=()=>setFont(slider.value);document.getElementById('minus').onclick=()=>setFont(font-2);document.getElementById('plus').onclick=()=>setFont(font+2);document.getElementById('reset').onclick=()=>setFont(31);
 document.getElementById('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{document.getElementById('status').textContent='Full screen is unavailable in this browser.'}};
-const settings=document.getElementById('mobileToolsButton');function tools(open){header.classList.toggle('mobile-tools-open',open);settings.setAttribute('aria-expanded',String(open));requestAnimationFrame(positionMenu)}settings.onclick=()=>{setFileMenu(false);tools(settings.getAttribute('aria-expanded')!=='true')};
+// READIQ_SETTINGS_PANEL_V1
+const settings=document.getElementById('mobileToolsButton');
+const settingsPanel=document.getElementById('readingSettingsPanel');
+document.addEventListener('pointerdown',event=>{
+ if(!settingsPanel.hidden&&!settingsPanel.contains(event.target)&&!settings.contains(event.target))tools(false);
+});
+header.addEventListener('keydown',event=>{
+ if(event.key==='Escape'&&!settingsPanel.hidden){
+  tools(false);
+  settings.focus();
+ }
+},{capture:true});function tools(open){settingsPanel.hidden=!open;settings.setAttribute('aria-expanded',String(open));requestAnimationFrame(positionMenu)}settings.onclick=()=>{setFileMenu(false);tools(settings.getAttribute('aria-expanded')!=='true')};
 function layout(){document.documentElement.style.setProperty('--read-header-height',header.getBoundingClientRect().height+'px');positionMenu()}
 new ResizeObserver(layout).observe(header);window.addEventListener('resize',layout);layout();
 function background(){const n=Math.floor(scrollY/900)%3;document.documentElement.style.setProperty('--scroll-bg',['#fff8d9','#e7f7ff','#eef9ea'][n]);document.documentElement.style.setProperty('--reader-bg',['#fffdf9','#f7fcff','#fbfff7'][n])}window.addEventListener('scroll',background,{passive:true});background();
