@@ -133,6 +133,78 @@ function appendSurahHeading(code) {
  content.append(heading);
 }
 
+// READIQ_COPY_REFLECTION_V1
+const reflectionPrompts = {
+ ur: {
+  title:'قرآنی غور و فکر — سمجھ سے عمل تک',
+  instructions:'صرف نیچے دی گئی ایک آیت کی وضاحت نرم، سادہ اور رواں اردو رسم الخط میں لکھیے۔ پہلے درج شدہ ریکارڈ بعینہٖ نقل کیجیے۔ کوڈ، نام، نمبر، اعراب، املا، رموزِ اوقاف اور تینوں متن اپنی اصل صورت میں رکھیے۔ پھر ایک یا دو نرم تعارفی جملوں سے وضاحت شروع کیجیے۔ آیت کے مطابق واضح عنوانات اور مربوط پیراگراف استعمال کیجیے۔ پہلے براہِ راست مطلب اور اہم الفاظ سمجھائیے، پھر عملی غور و فکر الگ واضح کیجیے۔ دوسری آیات، تاریخی پس منظر اور بیرونی حوالے شامل نہ کیجیے۔ جہاں معنی واضح نہ ہو، غیر یقینی بات کو یقینی نہ کہیں۔ روزمرہ کی ایک مثال، آج سے شروع کرنے کا ایک چھوٹا قدم، مناسب مدت اور پیش رفت کا جائزہ لینے کا طریقہ دیجیے۔ اہم نکات نمایاں کیجیے۔ وضاحت کی طوالت تینوں اصل متون کے مجموعی الفاظ سے تقریباً چھ گنا ہو، دس فی صد کی گنجائش کے ساتھ۔ ابتدائی ریکارڈ، تعارفی جملے اور عنوانات اس گنتی سے خارج ہیں۔ سلام، رسمی افتتاح، فہرست، جدول اور تحریری جواب طلب کرنے والے سوالات شامل نہ کیجیے۔ صرف اصل ریکارڈ اور اردو وضاحت دیجیے۔',
+  labels:['آیت کا کوڈ','پارے کا نمبر','پارے کا عربی نام','سورت کا نمبر','سورت کا عربی نام','آیت کا نمبر','مکمل عربی آیت','مکمل اردو ترجمہ','مکمل انگریزی ترجمہ'],
+  button:'اردو وضاحت کی ہدایت نقل کریں',
+  copied:'اردو ہدایت نقل ہو گئی'
+ },
+ en: {
+  title:'Qur’anic Reflection: From Understanding to Action',
+  instructions:'Explain only the single verse supplied below in warm, clear everyday English. First reproduce the supplied record exactly, preserving its code, names, numbers, wording, punctuation, diacritics and line breaks. Then begin the reflection with one or two gentle introductory sentences. Use descriptive headings and connected paragraphs. Explain the direct meaning and important wording first, then distinguish practical reflections from the verse’s direct teaching. Use only the supplied verse and translations. Do not introduce another verse, historical background, or external citations. Acknowledge uncertainty where appropriate. Include one ordinary example, one small action to start today, a realistic time frame and a way to review progress and adjust. Bold important ideas. Aim for a reflection six times the combined word count of the three supplied texts, within ten percent, excluding the record, introduction and headings. Omit opening formulas, bullets, tables and questions requiring written answers. Return only the unchanged record and the English reflection.',
+  labels:['Verse code','Para number','Para name in Arabic','Surah number','Surah name in Arabic','Verse number','Complete Arabic verse','Complete Urdu translation','Complete English translation'],
+  button:'Copy English reflection prompt',
+  copied:'English prompt copied'
+ }
+};
+function reflectionText(verse, language){
+ const code = /^P(\d+)[-–]S(\d+)[-–](\d+)$/.exec(verse.code);
+ if (!code) return '';
+ const [,para,surah,ayah] = code;
+ const values = [verse.code,para,paraNames[Number(para)-1]?.[0],surah,surahHeadingData[Number(surah)]?.[0],ayah,verse.ar,verse.ur,verse.en];
+ if (values.some(value => typeof value !== 'string' || !value.trim())) return '';
+ const prompt = reflectionPrompts[language];
+ const record = prompt.labels.map((label,index) => label + (index < 6 ? ': ' : '\n') + values[index]);
+ return [prompt.title,prompt.instructions,...record].join('\n\n');
+}
+async function copyReflection(text){
+ try {
+  await navigator.clipboard.writeText(text);
+  return true;
+ } catch {
+  const box = document.createElement('textarea');
+  box.value = text;
+  box.setAttribute('aria-label','Reflection prompt');
+  box.style.cssText = 'position:fixed;inset:0 auto auto 0;opacity:0';
+  const active = document.activeElement;
+  document.body.append(box);
+  box.select();
+  try { return document.execCommand('copy'); }
+  catch { return false; }
+  finally { box.remove(); active?.focus(); }
+ }
+}
+function appendReflectionCode(section, code, verse){
+ const row = document.createElement('div');
+ row.className = 'iq-reflection-code';
+ row.dir = 'ltr';
+ const status = document.createElement('span');
+ status.className = 'iq-reflection-status';
+ status.setAttribute('role','status');
+ const buttons = ['ur','en'].map(language => {
+  const prompt = reflectionPrompts[language];
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.lang = language;
+  button.textContent = language === 'ur' ? 'U' : 'E';
+  button.title = prompt.button;
+  button.setAttribute('aria-label',prompt.button);
+  button.onclick = async () => {
+   const text = reflectionText(verse,language);
+   status.textContent = '';
+   if (!text) { status.textContent = 'Complete verse details are unavailable.'; return; }
+   const copied = await copyReflection(text);
+   status.textContent = copied ? prompt.copied : 'Clipboard unavailable. Please allow clipboard access and try again.';
+  };
+  return button;
+ });
+ row.append(buttons[0],code,buttons[1]);
+ section.append(row,status);
+}
+
 function render(){updateLanguageRow();if(readingMode==='asma'){renderAsma();return}content.classList.remove('asma-mode');if(readingMode==='about'){renderAbout();return}content.classList.remove('about-mode');
 if(readingMode==='selected-surahs'){renderSelectedSurahs();return}
 if(readingMode==='selected-verses'&&!verses.length)return;
@@ -148,7 +220,7 @@ if(!verses.length){const p=document.createElement('p');p.className='empty';p.tex
 for(const [index,v] of verses.entries()){
 if(index>0)appendSurahHeading(v.code);
 if(index>0 && window.ReadIQBismillah.applies(v.code))content.append(window.ReadIQBismillah.block());
-const section=document.createElement('section');section.className='verse';section.setAttribute('aria-label',v.code);const code=document.createElement('div');code.className='verse-code';code.dir='ltr';code.textContent=v.code;section.append(code);for(const k of ['ar','ur','en']){if(!langs.includes(k))continue;const p=document.createElement('p');p.className='verse-'+k;p.lang=k;p.dir=k==='en'?'ltr':'rtl';p.textContent=k==='ar'?cleanArabicEnd(v[k]):cleanTranslationMarkers(v[k]);section.append(p)}content.append(section)}highlight();}
+const section=document.createElement('section');section.className='verse';section.setAttribute('aria-label',v.code);const code=document.createElement('div');code.className='verse-code';code.dir='ltr';code.textContent=v.code;appendReflectionCode(section,code,v);for(const k of ['ar','ur','en']){if(!langs.includes(k))continue;const p=document.createElement('p');p.className='verse-'+k;p.lang=k;p.dir=k==='en'?'ltr':'rtl';p.textContent=k==='ar'?cleanArabicEnd(v[k]):cleanTranslationMarkers(v[k]);section.append(p)}content.append(section)}highlight();}
 function highlight(){content.querySelectorAll('mark').forEach(m=>m.replaceWith(document.createTextNode(m.textContent)));content.normalize();const term=search.value.trim();if(!term)return;const walker=document.createTreeWalker(content,NodeFilter.SHOW_TEXT),nodes=[];let node;while(node=walker.nextNode())if(node.nodeValue.toLowerCase().includes(term.toLowerCase()))nodes.push(node);for(const n of nodes){const raw=n.nodeValue,frag=document.createDocumentFragment();let pos=0,at;while((at=raw.toLowerCase().indexOf(term.toLowerCase(),pos))!==-1){frag.append(document.createTextNode(raw.slice(pos,at)));const m=document.createElement('mark');m.className='match';m.textContent=raw.slice(at,at+term.length);frag.append(m);pos=at+term.length}frag.append(document.createTextNode(raw.slice(pos)));n.replaceWith(frag)}}
 checks.forEach(c=>c.onchange=()=>{save('readiq-languages',selectedLanguages());render()});search.oninput=()=>{highlight();content.querySelector('mark')?.scrollIntoView({block:'center',behavior:'smooth'})};
 async function openFile(file){window.ReadIQWordByWord?.hide();window.ReadIQPractice?.hide();clearAsmaHash();readingMode='quarter';save('readiq-mode','quarter');selected=file;save('readiq-selected',file.id);renderLibrary();renderParasMenu();renderSurahsMenu();const n=++token;verses=[];search.value='';title.textContent='Para-'+String(file.para).padStart(2,'0')+' · '+file.label;content.textContent='Opening quarter…';try{const r=await fetch(file.url,{cache:'no-store'});if(!r.ok)throw Error('Cannot open quarter');const data=await r.json();if(n!==token)return;verses=data.verses;render();document.getElementById('status').textContent=verses.length+' verses in this quarter'}catch(e){if(n===token)content.textContent=e.message}}
