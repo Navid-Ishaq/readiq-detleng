@@ -16,9 +16,12 @@ for(const para of catalogue.folders){const d=document.createElement('details');d
 if(!catalogue.folders.length)fileCards.textContent='No Para folders yet.';document.getElementById('fileMenuCount').textContent='('+catalogue.files.length+')';}
 function selectedLanguages(){return checks.filter(c=>c.checked).map(c=>c.dataset.language)}
 function render(){if(readingMode==='asma'){renderAsma();return}content.classList.remove('asma-mode');if(readingMode==='about'){renderAbout();return}content.classList.remove('about-mode');const langs=selectedLanguages();content.replaceChildren();document.getElementById('languageSummary').textContent=langs.map(k=>({ar:'Arabic',ur:'Urdu',en:'English'})[k]).join(' · ');document.getElementById('fileCount').textContent=verses.length+' VERSES';
+if(window.ReadIQBismillah.applies(verses[0]?.code,true))content.append(window.ReadIQBismillah.block());
 if(!langs.length){const p=document.createElement('p');p.className='empty';p.textContent='Choose Arabic, Urdu or English from Library.';content.append(p);return}
 if(!verses.length){const p=document.createElement('p');p.className='empty';p.textContent='Choose a quarter from Library to begin reading.';content.append(p);return}
-for(const v of verses){const section=document.createElement('section');section.className='verse';section.setAttribute('aria-label',v.code);const code=document.createElement('div');code.className='verse-code';code.dir='ltr';code.textContent=v.code;section.append(code);for(const k of ['ar','ur','en']){if(!langs.includes(k))continue;const p=document.createElement('p');p.className='verse-'+k;p.lang=k;p.dir=k==='en'?'ltr':'rtl';p.textContent=k==='ar'?cleanArabicEnd(v[k]):cleanTranslationMarkers(v[k]);section.append(p)}content.append(section)}highlight();}
+for(const [index,v] of verses.entries()){
+if(index>0 && window.ReadIQBismillah.applies(v.code))content.append(window.ReadIQBismillah.block());
+const section=document.createElement('section');section.className='verse';section.setAttribute('aria-label',v.code);const code=document.createElement('div');code.className='verse-code';code.dir='ltr';code.textContent=v.code;section.append(code);for(const k of ['ar','ur','en']){if(!langs.includes(k))continue;const p=document.createElement('p');p.className='verse-'+k;p.lang=k;p.dir=k==='en'?'ltr':'rtl';p.textContent=k==='ar'?cleanArabicEnd(v[k]):cleanTranslationMarkers(v[k]);section.append(p)}content.append(section)}highlight();}
 function highlight(){content.querySelectorAll('mark').forEach(m=>m.replaceWith(document.createTextNode(m.textContent)));content.normalize();const term=search.value.trim();if(!term)return;const walker=document.createTreeWalker(content,NodeFilter.SHOW_TEXT),nodes=[];let node;while(node=walker.nextNode())if(node.nodeValue.toLowerCase().includes(term.toLowerCase()))nodes.push(node);for(const n of nodes){const raw=n.nodeValue,frag=document.createDocumentFragment();let pos=0,at;while((at=raw.toLowerCase().indexOf(term.toLowerCase(),pos))!==-1){frag.append(document.createTextNode(raw.slice(pos,at)));const m=document.createElement('mark');m.className='match';m.textContent=raw.slice(at,at+term.length);frag.append(m);pos=at+term.length}frag.append(document.createTextNode(raw.slice(pos)));n.replaceWith(frag)}}
 checks.forEach(c=>c.onchange=()=>{save('readiq-languages',selectedLanguages());render()});search.oninput=()=>{highlight();content.querySelector('mark')?.scrollIntoView({block:'center',behavior:'smooth'})};
 async function openFile(file){window.ReadIQWordByWord?.hide();window.ReadIQPractice?.hide();clearAsmaHash();readingMode='quarter';save('readiq-mode','quarter');selected=file;save('readiq-selected',file.id);renderLibrary();renderParasMenu();renderSurahsMenu();const n=++token;verses=[];search.value='';title.textContent='Para-'+String(file.para).padStart(2,'0')+' · '+file.label;content.textContent='Opening quarter…';try{const r=await fetch(file.url,{cache:'no-store'});if(!r.ok)throw Error('Cannot open quarter');const data=await r.json();if(n!==token)return;verses=data.verses;render();document.getElementById('status').textContent=verses.length+' verses in this quarter'}catch(e){if(n===token)content.textContent=e.message}}
@@ -187,6 +190,35 @@ window.ReadIQPracticeBridge={
 };
 
 // READIQ_PRACTICE_BRIDGE_END
+
+
+// READIQ_BISMILLAH_SELECTIONS_V1
+window.ReadIQBismillah = (() => {
+ const lines = [
+  ['ar', 'rtl', 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ✨'],
+  ['ur', 'rtl', 'اللہ کے نام سے شروع جو نہایت مہربان ہمیشہ رحم فرمانے والا ہے'],
+  ['en', 'ltr', 'In the Name of Allah, the Most Compassionate, the Ever-Merciful']
+ ];
+ function applies(code, selectionStart = false) {
+  const match = /^P\d+[-–]S(\d+)[-–](\d+)$/u.exec(code);
+  if (!match) return false;
+  const surah = Number(match[1]), ayah = Number(match[2]);
+  return !(surah === 9 && ayah === 1) && (selectionStart || ayah === 1);
+ }
+ function block() {
+  const banner = document.createElement('div');
+  banner.className = 'iq-bismillah';
+  for (const [lang, dir, value] of lines) {
+   const line = document.createElement(lang === 'ar' ? 'strong' : 'p');
+   line.lang = lang;
+   line.dir = dir;
+   line.textContent = value;
+   banner.append(line);
+  }
+  return banner;
+ }
+ return { applies, block };
+})();
 
 refresh();setInterval(refresh,30000);
 

@@ -38,6 +38,16 @@ if(context.mode==='word'){
  $('ip-verse').setAttribute('aria-label','Flip this word to its meaning');
 } 
 
+// READIQ_BISMILLAH_SELECTIONS_V1
+const opening = window.ReadIQBismillah;
+const groupOpening = document.createElement('div');
+const questionOpening = document.createElement('div');
+const sectionOpening = document.createElement('div');
+$('ip-groups').prepend(sectionOpening);
+$('ip-play').prepend(groupOpening);
+$('ip-card').before(questionOpening);
+if(opening.applies(data[0]?.code,true))sectionOpening.append(opening.block());
+
 $('ip-scope-label').textContent=context.title;
 const sessions=new Map();let scope='current',size=10,start=1,end=data.length,langs=context.languages.length?[...context.languages]:['ur','en'],kind='mcq',mode='learn',selectedGroup='all',attempt=null,index=0,flipped=false,pendingAction=null,fontSize=28;
 const titles={current:context.title};
@@ -55,7 +65,14 @@ function renderGroups(){const max=pool().length;$('ip-start-range').max=max;$('i
 function back(){if($('ip-result').open)$('ip-result').close();$('ip-play').hidden=true;$('ip-groups').hidden=false;renderGroups()}
 function choose(n){const q=attempt.rows[index];if(attempt.done||kind!=='mcq'||mode==='learn'&&q.answer!==null)return;q.answer=n;render()}
 function flip(){if(kind==='mcq'&&mode==='test'&&!attempt.done)return;flipped=!flipped;attempt.rows[index].seen=true;render()}
-function render(){const q=attempt.rows[index],feedback=mode==='learn'||attempt.done,answered=attempt.rows.filter(x=>x.answer!==null).length;
+function render(){const q=attempt.rows[index];
+const first = attempt.rows.reduce((a,b)=>a.number<b.number?a:b);
+const showGroupOpening = opening.applies(first.v.code,true);
+groupOpening.replaceChildren(...(showGroupOpening?[opening.block()]:[]));
+const isFirstWord = !attempt.rows.some(row=>row.v.code===q.v.code && row.number<q.number);
+const showSurahOpening = q.v.code!==first.v.code && isFirstWord && opening.applies(q.v.code);
+questionOpening.replaceChildren(...(showSurahOpening?[opening.block()]:[]));
+const feedback=mode==='learn'||attempt.done,answered=attempt.rows.filter(x=>x.answer!==null).length;
 $('ip-title').textContent=titles[scope];$('ip-position').textContent=(index+1)+' / '+attempt.rows.length;$('ip-qnumber').textContent='Question '+String(q.number).padStart(2,'0');$('ip-arabic').textContent=q.v.ar;$('ip-code').textContent=q.v.code+(context.mode==='word'?' · Word '+q.v.serial:'');if(context.mode==='word'){for(const [key,field] of [['ar','fullAr'],['ur','fullUr'],['en','fullEn']]){const node=$('ip-word-context-'+key);node.textContent=q.v[field]||'';node.hidden=!$('ip-full-'+key).checked}$('ip-full-context').hidden=!['ar','ur','en'].some(key=>$('ip-full-'+key).checked)}
 $('ip-mcq').setAttribute('aria-pressed',String(kind==='mcq'));$('ip-flash').setAttribute('aria-pressed',String(kind==='flash'));$('ip-learn').setAttribute('aria-pressed',String(mode==='learn'));$('ip-test').setAttribute('aria-pressed',String(mode==='test'));$('ip-mode-row').hidden=kind==='flash';
 $('ip-state').textContent=kind==='flash'?'Classic Flashcards · Think, then flip to reveal':attempt.done?'Test complete · '+attempt.rows.filter(correctness).length+'/'+attempt.rows.length+' correct':mode==='learn'?'Learning Mode · Instant feedback · First answer locks':'Test Mode · '+answered+'/'+attempt.rows.length+' answered';

@@ -48,7 +48,13 @@ async function load(){
 }
 function text(tag,value,cls,lang,dir){const e=document.createElement(tag);e.textContent=value;if(cls)e.className=cls;if(lang)e.lang=lang;if(dir)e.dir=dir;return e}
 function render(){if(!active)return;const container=$('wb-verses');container.replaceChildren();const groups=new Map();for(const w of active.rows){if(!groups.has(w.code))groups.set(w.code,[]);groups.get(w.code).push(w)}
- for(const [code,rows] of groups){const section=document.createElement('section');section.className='wb-ayah';section.append(text('p',code,'wb-code','en','ltr'));if($('wb-full-ar').checked)section.append(text('p',rows[0].fullAr,'wb-ar wb-full','ar','rtl'));if($('wb-full-ur').checked)section.append(text('p',rows[0].fullUr,'wb-full-ur','ur','rtl'));if($('wb-full-en').checked)section.append(text('p',rows[0].fullEn,'wb-full-en','en','ltr'));const grid=document.createElement('div');grid.className='wb-word-grid';grid.dir='rtl';
+ // READIQ_BISMILLAH_SELECTIONS_V1
+ const opening = window.ReadIQBismillah;
+ let firstAyah = true;
+ for(const [code,rows] of groups){
+  if(opening.applies(code,firstAyah))container.append(opening.block());
+  firstAyah = false;
+ const section=document.createElement('section');section.className='wb-ayah';section.append(text('p',code,'wb-code','en','ltr'));if($('wb-full-ar').checked)section.append(text('p',rows[0].fullAr,'wb-ar wb-full','ar','rtl'));if($('wb-full-ur').checked)section.append(text('p',rows[0].fullUr,'wb-full-ur','ur','rtl'));if($('wb-full-en').checked)section.append(text('p',rows[0].fullEn,'wb-full-en','en','ltr'));const grid=document.createElement('div');grid.className='wb-word-grid';grid.dir='rtl';
   for(const w of rows){const tile=document.createElement('article');tile.className='wb-word';tile.append(text('p',w.ar,'wb-ar','ar','rtl'));if($('wb-urdu').checked)tile.append(text('p',w.ur,'wb-ur','ur','rtl'));if($('wb-english').checked)tile.append(text('p',w.en,'wb-en','en','ltr'));grid.append(tile)}section.append(grid);container.append(section)}
 }
 for(const id of ['wb-urdu','wb-english','wb-full-ar','wb-full-ur','wb-full-en'])$(id).onchange=render;
