@@ -6,7 +6,7 @@ const checks=[...document.querySelectorAll('[data-language]')];
 function saved(key,fallback){try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}}
 function save(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch{}}
 const languageChoice=saved('readiq-languages',['ar','ur','en']);checks.forEach(c=>c.checked=languageChoice.includes(c.dataset.language));
-function positionMenu(){const b=fileToggle.getBoundingClientRect(),w=Math.min(560,innerWidth-28);document.documentElement.style.setProperty('--menu-left',Math.max(14,Math.min(b.left,innerWidth-w-14))+'px');document.documentElement.style.setProperty('--header-bottom',Math.ceil(header.getBoundingClientRect().bottom)+6+'px')}
+function positionMenu(){const b=exploreAnchor(fileToggle).getBoundingClientRect(),w=Math.min(560,innerWidth-28);document.documentElement.style.setProperty('--menu-left',Math.max(14,Math.min(b.left,innerWidth-w-14))+'px');document.documentElement.style.setProperty('--header-bottom',Math.ceil(header.getBoundingClientRect().bottom)+6+'px')}
 function setFileMenu(open){fileMenu.hidden=!open;fileToggle.setAttribute('aria-expanded',String(open));positionMenu()}
 fileToggle.onclick=()=>{tools(false);setFileMenu(fileMenu.hidden)};
 document.addEventListener('pointerdown',e=>{if(!fileMenu.contains(e.target)&&!fileToggle.contains(e.target))setFileMenu(false)});
@@ -117,7 +117,7 @@ const paraToggle=document.createElement('button');paraToggle.type='button';paraT
 const paraMenu=document.createElement('div');paraMenu.className='file-menu';paraMenu.id='paraMenu';paraMenu.hidden=true;paraMenu.setAttribute('aria-label','Complete Paras');
 const paraBar=document.createElement('div');paraBar.className='library-toolbar';const paraHeading=document.createElement('strong');paraHeading.textContent='📖 Paras';paraBar.append(paraHeading);paraMenu.append(paraBar);
 const paraList=document.createElement('div');paraList.className='para-list';paraMenu.append(paraList);document.body.append(paraMenu);
-function positionParas(){const box=paraToggle.getBoundingClientRect(),width=Math.min(560,innerWidth-28);paraMenu.style.left=Math.max(14,Math.min(box.left,innerWidth-width-14))+'px';paraMenu.style.top=Math.ceil(header.getBoundingClientRect().bottom)+6+'px'}
+function positionParas(){const box=exploreAnchor(paraToggle).getBoundingClientRect(),width=Math.min(560,innerWidth-28);paraMenu.style.left=Math.max(14,Math.min(box.left,innerWidth-width-14))+'px';paraMenu.style.top=Math.ceil(header.getBoundingClientRect().bottom)+6+'px'}
 function showParaMenu(open){paraMenu.hidden=!open;paraToggle.setAttribute('aria-expanded',String(open));if(open){setFileMenu(false);tools(false);positionParas()}}
 paraToggle.onclick=()=>showParaMenu(paraMenu.hidden);
 fileToggle.addEventListener('click',()=>showParaMenu(false));settings.addEventListener('click',()=>showParaMenu(false));
@@ -142,7 +142,7 @@ const surahToggle=document.createElement('button');surahToggle.type='button';sur
 const surahMenu=document.createElement('div');surahMenu.className='file-menu';surahMenu.id='surahMenu';surahMenu.hidden=true;surahMenu.setAttribute('aria-label','Complete Surahs');
 const surahBar=document.createElement('div');surahBar.className='library-toolbar';const surahHeading=document.createElement('strong');surahHeading.textContent='📜 Surahs';surahBar.append(surahHeading);surahMenu.append(surahBar);
 const surahList=document.createElement('div');surahList.className='surah-list';surahMenu.append(surahList);document.body.append(surahMenu);
-function positionSurahs(){const box=surahToggle.getBoundingClientRect(),width=Math.min(560,innerWidth-28);surahMenu.style.left=Math.max(14,Math.min(box.left,innerWidth-width-14))+'px';surahMenu.style.top=Math.ceil(header.getBoundingClientRect().bottom)+6+'px'}
+function positionSurahs(){const box=exploreAnchor(surahToggle).getBoundingClientRect(),width=Math.min(560,innerWidth-28);surahMenu.style.left=Math.max(14,Math.min(box.left,innerWidth-width-14))+'px';surahMenu.style.top=Math.ceil(header.getBoundingClientRect().bottom)+6+'px'}
 function showSurahMenu(open){surahMenu.hidden=!open;surahToggle.setAttribute('aria-expanded',String(open));if(open){setFileMenu(false);showParaMenu(false);tools(false);positionSurahs()}}
 surahToggle.onclick=()=>showSurahMenu(surahMenu.hidden);
 fileToggle.addEventListener('click',()=>showSurahMenu(false));paraToggle.addEventListener('click',()=>showSurahMenu(false));settings.addEventListener('click',()=>showSurahMenu(false));
@@ -200,7 +200,7 @@ const asmaLabels={ar:'Arabic',ur:'Urdu',en:'English',pronunciation:'Pronunciatio
 const asmaOptions=document.createElement('div');asmaOptions.className='asma-options';
 for(const [key,urdu,en] of [['allah','اسماء الحسنیٰ','99 Names of Allah'],['nabi','اسماء النبی ﷺ','Asma-ul-Nabi ﷺ']]){const button=document.createElement('button');button.type='button';button.className='asma-option';button.dataset.asmaKind=key;const ar=document.createElement('strong');ar.lang='ur';ar.dir='rtl';ar.textContent=urdu;const sub=document.createElement('small');sub.textContent=en;button.append(ar,sub);button.onclick=()=>{showAsmaMenu(false);openAsma(key);window.scrollTo({top:0,behavior:'smooth'})};asmaOptions.append(button)}
 asmaMenu.append(asmaOptions);document.body.append(asmaMenu);
-function positionAsma(){const box=asmaToggle.getBoundingClientRect(),width=Math.min(560,innerWidth-28);asmaMenu.style.width=width+'px';asmaMenu.style.left=Math.max(14,Math.min(box.left,innerWidth-width-14))+'px';asmaMenu.style.top=Math.ceil(header.getBoundingClientRect().bottom)+6+'px'}
+function positionAsma(){const box=exploreAnchor(asmaToggle).getBoundingClientRect(),width=Math.min(560,innerWidth-28);asmaMenu.style.width=width+'px';asmaMenu.style.left=Math.max(14,Math.min(box.left,innerWidth-width-14))+'px';asmaMenu.style.top=Math.ceil(header.getBoundingClientRect().bottom)+6+'px'}
 function showAsmaMenu(open){asmaMenu.hidden=!open;asmaToggle.setAttribute('aria-expanded',String(open));if(open){setFileMenu(false);showParaMenu(false);showSurahMenu(false);tools(false);positionAsma()}}
 asmaToggle.onclick=()=>showAsmaMenu(asmaMenu.hidden);
 for(const other of [fileToggle,paraToggle,surahToggle,settings,document.querySelector('.readiq-about-link')])if(other)other.addEventListener('click',()=>showAsmaMenu(false));
@@ -304,6 +304,76 @@ window.ReadIQBismillah = (() => {
 })();
 
 updateLanguageRow();
+
+// READIQ_EXPLORE_V1
+function exploreAnchor(control) {
+ return document.getElementById('iqExploreToggle') || control;
+}
+
+const exploreToggle = document.createElement('button');
+exploreToggle.id = 'iqExploreToggle';
+exploreToggle.type = 'button';
+exploreToggle.className = 'file-toggle';
+exploreToggle.textContent = '☰ Explore';
+exploreToggle.setAttribute('aria-controls','iqExploreMenu');
+exploreToggle.setAttribute('aria-expanded','false');
+const exploreMenu = document.createElement('nav');
+exploreMenu.id = 'iqExploreMenu';
+exploreMenu.className = 'file-menu';
+exploreMenu.setAttribute('aria-label','Explore');
+exploreMenu.hidden = true;
+fileToggle.parentElement.prepend(exploreToggle);
+document.body.append(exploreMenu);
+for(const control of [fileToggle,paraToggle,surahToggle,asmaToggle,aboutLink]){
+ exploreMenu.append(control);
+}
+function positionExplore() {
+ if (exploreMenu.hidden) return;
+ const left = exploreToggle.getBoundingClientRect().left;
+ const width = exploreMenu.getBoundingClientRect().width;
+ exploreMenu.style.left = Math.max(14,Math.min(left,innerWidth-width-14))+'px';
+ exploreMenu.style.top = Math.ceil(header.getBoundingClientRect().bottom)+6+'px';
+}
+function hideExplore() {
+ exploreMenu.hidden = true;
+ exploreToggle.setAttribute('aria-expanded','false');
+}
+exploreToggle.onclick = () => {
+ if (!exploreMenu.hidden) { hideExplore(); return; }
+ document.querySelectorAll('.file-menu').forEach(panel=>panel.hidden=true);
+ document.querySelectorAll('[aria-controls$="Menu"]').forEach(control=>control.setAttribute('aria-expanded','false'));
+ tools(false);
+ exploreMenu.hidden = false;
+ exploreToggle.setAttribute('aria-expanded','true');
+ positionExplore();
+ exploreMenu.querySelector('button')?.focus();
+};
+exploreMenu.addEventListener('click',event=>{
+ const control = event.target.closest('button,a');
+ if (!control || !exploreMenu.contains(control)) return;
+ const child = document.getElementById(control.getAttribute('aria-controls'));
+ hideExplore();
+ if (child && !child.hidden && !child.contains(document.activeElement)) {
+  child.tabIndex = -1;
+  child.focus();
+ } else if (!child || child.hidden) exploreToggle.focus();
+});
+document.addEventListener('pointerdown',event=>{
+ if (!exploreMenu.contains(event.target) && !exploreToggle.contains(event.target)) hideExplore();
+});
+document.addEventListener('keydown',event=>{
+ if (event.key !== 'Escape') return;
+ const opened = !exploreMenu.hidden || Array.from(exploreMenu.querySelectorAll('[aria-controls]')).some(control=>{
+  const panel = document.getElementById(control.getAttribute('aria-controls'));
+  return panel && !panel.hidden;
+ });
+ if (!opened) return;
+ hideExplore();
+ queueMicrotask(()=>exploreToggle.focus());
+},true);
+window.addEventListener('resize',positionExplore);
+window.addEventListener('scroll',positionExplore,{passive:true});
+
 refresh();setInterval(refresh,30000);
 
 // READIQ_VERSE_CIRCLE_V1

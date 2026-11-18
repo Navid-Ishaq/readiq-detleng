@@ -6,7 +6,12 @@ const bridge=window.ReadIQPracticeBridge;
 if(!bridge)return;
 const anchor=document.querySelector('.library-anchor'),reader=document.querySelector('main .reader');
 if(!anchor||!reader||document.getElementById('iqPracticeLaunch'))return;
-const button=document.createElement('button');button.type='button';button.id='iqPracticeLaunch';button.className='file-toggle';button.textContent='MCQs & Flashcards ▾';button.setAttribute('aria-controls','iqPracticeMenu');button.title='MCQs and Flashcards for the opened Quarter, Para or Surah';anchor.append(button);
+const button=document.createElement('button');button.type='button';button.id='iqPracticeLaunch';button.className='file-toggle';button.textContent='MCQs & Flashcards ▾';button.setAttribute('aria-controls','iqPracticeMenu');button.title='MCQs and Flashcards for the opened Quarter, Para or Surah';// READIQ_EXPLORE_V1
+const exploreMenu = document.getElementById('iqExploreMenu');
+if (exploreMenu) {
+ const asma = document.getElementById('asmaToggle');
+ exploreMenu.insertBefore(button,asma);
+} else anchor.append(button);
 let root=null,mounted=null,identity=null;
 function hide(){closeMenu();if(root)root.hidden=true;if(mounted)mounted.destroy();reader.hidden=false;document.documentElement.classList.remove('readiq-practice-open');button.setAttribute('aria-expanded','false')}
 // READIQ_PRACTICE_MENU_V1
@@ -28,7 +33,7 @@ function closeMenu() {
 }
 function positionMenu() {
  if(menu.hidden)return;
- const box = button.getBoundingClientRect();
+ const box = (document.getElementById('iqExploreToggle') || button).getBoundingClientRect();
  const width = menu.getBoundingClientRect().width;
  menu.style.left = Math.max(12,Math.min(box.left,innerWidth-width-12)) + 'px';
  menu.style.top = Math.ceil(anchor.closest('header').getBoundingClientRect().bottom)+6+'px';
@@ -40,7 +45,7 @@ document.addEventListener('focusin',e=>{
  if(!menu.contains(e.target)&&!button.contains(e.target))closeMenu();
 });
 document.addEventListener('keydown',e=>{
- if(e.key==='Escape'&&!menu.hidden){closeMenu();button.focus();}
+ if(e.key==='Escape'&&!menu.hidden){closeMenu();(document.getElementById('iqExploreToggle') || button).focus();}
 });
 window.addEventListener('resize',positionMenu);
 window.addEventListener('scroll',positionMenu,{passive:true});
@@ -67,12 +72,12 @@ button.onclick=()=>{
 };
 verseChoice.onclick=()=>{
  closeMenu();
- button.focus();
+ (document.getElementById('iqExploreToggle') || button).focus();
  try{openContext(bridge.snapshot())}catch(e){window.alert(e.message)}
 };
 wordChoice.onclick=()=>{
  closeMenu();
- button.focus();
+ (document.getElementById('iqExploreToggle') || button).focus();
  window.ReadIQWordByWord?.openPractice();
 };
 new MutationObserver(availability).observe(document.getElementById('content'),{childList:true,subtree:true});availability();
