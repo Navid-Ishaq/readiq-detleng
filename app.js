@@ -133,9 +133,15 @@ function appendSurahHeading(code) {
  content.append(heading);
 }
 
-function render(){updateLanguageRow();if(readingMode==='asma'){renderAsma();return}content.classList.remove('asma-mode');if(readingMode==='about'){renderAbout();return}content.classList.remove('about-mode');const langs=selectedLanguages();content.replaceChildren();document.getElementById('languageSummary').textContent=langs.map(k=>({ar:'Arabic',ur:'Urdu',en:'English'})[k]).join(' · ');document.getElementById('fileCount').textContent=verses.length+' VERSES';
-appendSurahHeading(verses[0]?.code);
-if(window.ReadIQBismillah.applies(verses[0]?.code,true))content.append(window.ReadIQBismillah.block());
+function render(){updateLanguageRow();if(readingMode==='asma'){renderAsma();return}content.classList.remove('asma-mode');if(readingMode==='about'){renderAbout();return}content.classList.remove('about-mode');
+if(readingMode==='selected-surahs'){renderSelectedSurahs();return}
+if(readingMode==='selected-verses'&&!verses.length)return;
+const langs=selectedLanguages();content.replaceChildren();document.getElementById('languageSummary').textContent=langs.map(k=>({ar:'Arabic',ur:'Urdu',en:'English'})[k]).join(' · ');document.getElementById('fileCount').textContent=verses.length+' VERSES';
+if (readingMode === 'selected-verses') content.append(selectedBackButton());
+else {
+ appendSurahHeading(verses[0]?.code);
+ if(window.ReadIQBismillah.applies(verses[0]?.code,true))content.append(window.ReadIQBismillah.block());
+}
 renderParaTitle();
 if(!langs.length){const p=document.createElement('p');p.className='empty';p.textContent='Choose Arabic, Urdu or English from Library.';content.append(p);return}
 if(!verses.length){const p=document.createElement('p');p.className='empty';p.textContent='Choose a quarter from Library to begin reading.';content.append(p);return}
@@ -146,7 +152,9 @@ const section=document.createElement('section');section.className='verse';sectio
 function highlight(){content.querySelectorAll('mark').forEach(m=>m.replaceWith(document.createTextNode(m.textContent)));content.normalize();const term=search.value.trim();if(!term)return;const walker=document.createTreeWalker(content,NodeFilter.SHOW_TEXT),nodes=[];let node;while(node=walker.nextNode())if(node.nodeValue.toLowerCase().includes(term.toLowerCase()))nodes.push(node);for(const n of nodes){const raw=n.nodeValue,frag=document.createDocumentFragment();let pos=0,at;while((at=raw.toLowerCase().indexOf(term.toLowerCase(),pos))!==-1){frag.append(document.createTextNode(raw.slice(pos,at)));const m=document.createElement('mark');m.className='match';m.textContent=raw.slice(at,at+term.length);frag.append(m);pos=at+term.length}frag.append(document.createTextNode(raw.slice(pos)));n.replaceWith(frag)}}
 checks.forEach(c=>c.onchange=()=>{save('readiq-languages',selectedLanguages());render()});search.oninput=()=>{highlight();content.querySelector('mark')?.scrollIntoView({block:'center',behavior:'smooth'})};
 async function openFile(file){window.ReadIQWordByWord?.hide();window.ReadIQPractice?.hide();clearAsmaHash();readingMode='quarter';save('readiq-mode','quarter');selected=file;save('readiq-selected',file.id);renderLibrary();renderParasMenu();renderSurahsMenu();const n=++token;verses=[];search.value='';title.textContent='Para-'+String(file.para).padStart(2,'0')+' · '+file.label;content.textContent='Opening quarter…';try{const r=await fetch(file.url,{cache:'no-store'});if(!r.ok)throw Error('Cannot open quarter');const data=await r.json();if(n!==token)return;verses=data.verses;render();document.getElementById('status').textContent=verses.length+' verses in this quarter'}catch(e){if(n===token)content.textContent=e.message}}
-async function refresh(){if(polling)return;polling=true;try{const r=await fetch('library.json',{cache:'no-store'});if(!r.ok)throw Error('Library unavailable');const next=await r.json();if(next.revision===revision)return;catalogue=next;revision=next.revision;renderLibrary();renderParasMenu();renderSurahsMenu();const id=selected?.id||saved('readiq-selected',null),chosen=catalogue.files.find(f=>f.id===id)||catalogue.files[0];if(readingMode==='asma')openAsma(asmaKind);else if(readingMode==='about')await openAbout();else if(readingMode==='surah')await openSurah(currentSurah);else if(readingMode==='para')await openPara(currentPara);else if(chosen)await openFile(chosen);else{selected=null;verses=[];++token;title.textContent='Irfan-ul-Quran';render();document.getElementById('status').textContent='Add quarter files to begin'}}catch{document.getElementById('status').textContent='Library unavailable. Please refresh.'}finally{polling=false}}
+async function refresh(){if(polling)return;polling=true;try{const r=await fetch('library.json',{cache:'no-store'});if(!r.ok)throw Error('Library unavailable');const next=await r.json();if(next.revision===revision)return;catalogue=next;revision=next.revision;renderLibrary();renderParasMenu();renderSurahsMenu();const id=selected?.id||saved('readiq-selected',null),chosen=catalogue.files.find(f=>f.id===id)||catalogue.files[0];if(readingMode==='selected-surahs'){renderSelectedSurahs();return;}
+if(readingMode==='selected-verses')return;
+if(readingMode==='asma')openAsma(asmaKind);else if(readingMode==='about')await openAbout();else if(readingMode==='surah')await openSurah(currentSurah);else if(readingMode==='para')await openPara(currentPara);else if(chosen)await openFile(chosen);else{selected=null;verses=[];++token;title.textContent='Irfan-ul-Quran';render();document.getElementById('status').textContent='Add quarter files to begin'}}catch{document.getElementById('status').textContent='Library unavailable. Please refresh.'}finally{polling=false}}
 let font=Number(saved('readiq-font',31));if(!Number.isFinite(font))font=31;
 function setFont(v){font=Math.max(18,Math.min(72,Number(v)));document.documentElement.style.setProperty('--size',font+'px');slider.value=font;fontValue.textContent=font+'px';save('readiq-font',font)}
 setFont(font);slider.oninput=()=>setFont(slider.value);document.getElementById('minus').onclick=()=>setFont(font-2);document.getElementById('plus').onclick=()=>setFont(font+2);document.getElementById('reset').onclick=()=>setFont(31);
@@ -513,6 +521,145 @@ function exploreAnchor(control) {
  return document.getElementById('iqExploreToggle') || control;
 }
 
+// READIQ_SELECTED_SURAHS_V1
+const selectedSurahCards = [
+ ['Daily', 'روزانہ', 'Morning and evening', [112, 113, 114]],
+ ['Nightly', 'ہر رات', 'Night reading', [67]],
+ ['Jummah', 'جمعہ', 'Friday reading', [18]],
+ ['Selected Verses', 'منتخب آیات', 'Al-Baqarah', [
+  {name:'Ayat al-Kursi', arabic:'آيَةُ الْكُرْسِيّ', reference:'2:255', codes:['P03-S2-255']},
+  {name:'Last two verses of Al-Baqarah', reference:'2:285–286', codes:['P03-S2-285','P03-S2-286']}
+ ]]
+];
+function bilingualLabel(element, english, translation, lang='ur'){
+ element.append(english);
+ if (!translation) return;
+ const label = document.createElement('bdi');
+ label.lang = lang;
+ label.dir = 'rtl';
+ label.textContent = translation;
+ element.append(' · ', label);
+}
+function selectedBackButton(){
+ const button = document.createElement('button');
+ button.type = 'button';
+ button.className = 'iq-selected-back';
+ button.textContent = '← Selected Surahs';
+ button.onclick = openSelectedSurahs;
+ return button;
+}
+function renderSelectedSurahs(){
+ const previous = new Set([...content.querySelectorAll('details[open][data-selected-card]')]
+  .map(card => card.dataset.selectedCard));
+ const grid = document.createElement('div');
+ grid.className = 'iq-selected-grid';
+ for (const [name, urdu, note, items] of selectedSurahCards){
+  const card = document.createElement('details');
+  card.dataset.selectedCard = name;
+  card.open = previous.has(name);
+  const summary = document.createElement('summary');
+  bilingualLabel(summary, name, urdu);
+  const subtitle = document.createElement('small');
+  subtitle.textContent = note;
+  summary.append(subtitle);
+  const list = document.createElement('ul');
+  for (const item of items){
+   const li = document.createElement('li');
+   const button = document.createElement('button');
+   button.type = 'button';
+   if (typeof item === 'number'){
+    const source = catalogue.surahs?.find(surah => surah.number === item);
+    bilingualLabel(button, item + ' · ' + surahNames[item-1][0], surahHeadingData[item]?.[0], 'ar');
+    if (!source?.complete || !source.url){
+     button.disabled = true;
+     button.append(' · Coming soon');
+    }
+    button.onclick = () => {
+     openSurah(item);
+     window.scrollTo(0,0);
+    };
+   } else {
+    bilingualLabel(button, item.name + ' · ' + item.reference, item.arabic, 'ar');
+    button.onclick = () => openSelectedVerses(item);
+   }
+   li.append(button);
+   list.append(li);
+  }
+  card.append(summary, list);
+  grid.append(card);
+ }
+ content.replaceChildren(grid);
+ document.getElementById('languageSummary').textContent = '';
+ document.getElementById('fileCount').textContent = 'SELECTED';
+ document.getElementById('status').textContent = 'Selected Surahs & Verses';
+ highlight();
+}
+function openSelectedSurahs(){
+ ++token;
+ window.ReadIQWordByWord?.hide();
+ window.ReadIQPractice?.hide();
+ clearAsmaHash();
+ readingMode = 'selected-surahs';
+ verses = [];
+ search.value = '';
+ title.replaceChildren();
+ bilingualLabel(title, 'Selected Surahs', 'منتخب سورتیں');
+ render();
+ window.scrollTo(0,0);
+}
+function normalizeSelectedCode(code){
+ const match = /^P(\d+)[-–]S(\d+)[-–](\d+)$/.exec(String(code).trim());
+ return match ? match.slice(1).map(Number).join(':') : '';
+}
+async function openSelectedVerses(item){
+ const request = ++token;
+ readingMode = 'selected-verses';
+ verses = [];
+ search.value = '';
+ title.replaceChildren();
+ bilingualLabel(title, item.name + ' · ' + item.reference, item.arabic, 'ar');
+ content.replaceChildren(selectedBackButton());
+ const message = document.createElement('p');
+ message.setAttribute('role','status');
+ message.textContent = 'Opening selected verses…';
+ content.append(message);
+ document.getElementById('fileCount').textContent = 'SELECTED';
+ document.getElementById('status').textContent = 'Opening selected verses…';
+ window.scrollTo(0,0);
+ const keys = item.codes.map(normalizeSelectedCode);
+ const paras = new Set(keys.map(code => Number(code.split(':')[0])));
+ const quarters = catalogue.files.filter(file => paras.has(Number(file.para)));
+ try {
+  const found = new Map();
+  const remaining = new Set(keys);
+  for (const file of quarters){
+   const response = await fetch(file.url,{cache:'no-store'});
+   if (request !== token) return;
+   if (!response.ok) throw Error('Could not load a quarter. Please try again.');
+   const data = await response.json();
+   if (request !== token) return;
+   if (!Array.isArray(data.verses)) throw Error('Could not read the verse data.');
+   for (const verse of data.verses){
+    const key = normalizeSelectedCode(verse.code);
+    if (remaining.delete(key)) found.set(key, verse);
+   }
+   if (!remaining.size) break;
+  }
+  if (remaining.size){
+   message.textContent = 'Coming soon · This verse selection is not available yet.';
+   document.getElementById('status').textContent = 'Coming soon';
+   return;
+  }
+  verses = keys.map(key => found.get(key));
+  document.getElementById('status').textContent = 'Selected Verses · ' + item.reference;
+  render();
+ } catch (error) {
+  if (request !== token) return;
+  message.textContent = error.message;
+  document.getElementById('status').textContent = 'Could not open selected verses';
+ }
+}
+
 const exploreToggle = document.createElement('button');
 exploreToggle.id = 'iqExploreToggle';
 exploreToggle.type = 'button';
@@ -527,7 +674,12 @@ exploreMenu.setAttribute('aria-label','Explore');
 exploreMenu.hidden = true;
 fileToggle.parentElement.prepend(exploreToggle);
 document.body.append(exploreMenu);
-for(const control of [fileToggle,paraToggle,surahToggle,asmaToggle,aboutLink]){
+const selectedSurahsButton = document.createElement('button');
+selectedSurahsButton.type = 'button';
+selectedSurahsButton.className = 'file-toggle';
+bilingualLabel(selectedSurahsButton, '☆ Selected Surahs', 'منتخب سورتیں');
+selectedSurahsButton.onclick = openSelectedSurahs;
+for(const control of [fileToggle,paraToggle,selectedSurahsButton,surahToggle,asmaToggle,aboutLink]){
  exploreMenu.append(control);
 }
 function positionExplore() {
