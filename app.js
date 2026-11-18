@@ -111,14 +111,16 @@ function appendSurahHeading(code) {
  const badge = document.createElement('span');
  badge.className = 'iq-surah-number';
  badge.textContent = String(number).padStart(2,'0');
- name.append(badge, arabicName, roman, meaning);
+ // READIQ_JADE_BANNER_V1
+ arabicName.className = 'iq-surah-ar';
  const icon = document.createElement('span');
  icon.className = 'iq-surah-info-icon';
  icon.textContent = 'i';
  const description = document.createElement('span');
  description.className = 'iq-surah-sr';
  description.textContent = ' — Surah information';
- summary.append(name, icon, description);
+ name.append(badge, roman, meaning, icon);
+ summary.append(arabicName, name, description);
  const details = document.createElement('div');
  details.className = 'iq-surah-info';
  details.lang = 'ur';
