@@ -224,11 +224,18 @@ renderSurahsMenu();
 
 // READIQ_ABOUT_READER_V2
 let aboutSource=null;
+// READIQ_ABOUT_LANG_V1
+let aboutLanguage = saved('readiq-about-language','en') === 'ur' ? 'ur' : 'en';
 function renderAbout(){content.classList.remove('asma-mode');
  content.classList.add('about-mode');content.replaceChildren();
- if(aboutSource)for(const article of aboutSource)content.append(article.cloneNode(true));
+ const article = aboutSource?.find(item=>item.id===(aboutLanguage==='ur'?'urdu':'english'));
+ if(article){
+  const copy = article.cloneNode(true);
+  copy.querySelectorAll('.language-label a').forEach(link=>link.remove());
+  content.append(copy);
+ }
  title.textContent='About Irfan-ul-Quran Read IQ';
- document.getElementById('languageSummary').textContent='English · اردو';
+ document.getElementById('languageSummary').textContent=aboutLanguage==='ur'?'اردو':'English';
  document.getElementById('fileCount').textContent='ABOUT';
  document.getElementById('status').textContent='About Read IQ';
  highlight();
@@ -243,7 +250,64 @@ async function openAbout(){window.ReadIQWordByWord?.hide();window.ReadIQPractice
  }catch(e){if(request===token)content.textContent=e.message;}
 }
 const aboutLink=document.querySelector('.readiq-about-link');
-if(aboutLink){aboutLink.href='#about';aboutLink.onclick=e=>{e.preventDefault();history.replaceState(null,'','#about');openAbout();window.scrollTo({top:0,behavior:'smooth'})};}
+const aboutLanguageMenu = document.createElement('div');
+aboutLanguageMenu.id = 'iqAboutLanguageMenu';
+aboutLanguageMenu.className = 'file-menu';
+aboutLanguageMenu.hidden = true;
+aboutLanguageMenu.setAttribute('aria-label','About language');
+function showAboutLanguages(open) {
+ aboutLanguageMenu.hidden = !open;
+ aboutLink?.setAttribute('aria-expanded',String(open));
+ if(!open)return;
+ tools(false);
+ positionAboutLanguages();
+}
+function positionAboutLanguages() {
+ if(aboutLanguageMenu.hidden)return;
+ const control = document.getElementById('iqExploreToggle') || aboutLink;
+ const width = aboutLanguageMenu.getBoundingClientRect().width;
+ aboutLanguageMenu.style.left = Math.max(14,Math.min(control.getBoundingClientRect().left,innerWidth-width-14))+'px';
+ aboutLanguageMenu.style.top = Math.ceil(header.getBoundingClientRect().bottom)+6+'px';
+}
+if(aboutLink){
+ aboutLink.setAttribute('aria-controls',aboutLanguageMenu.id);
+ aboutLink.setAttribute('aria-expanded','false');
+ aboutLink.onclick = event=>{
+  event.preventDefault();
+  const open = aboutLanguageMenu.hidden;
+  document.querySelectorAll('.file-menu').forEach(panel=>{if(panel!==aboutLanguageMenu)panel.hidden=true});
+  document.querySelectorAll('[aria-controls$="Menu"]').forEach(control=>control.setAttribute('aria-expanded','false'));
+  showAboutLanguages(open);
+ };
+ for(const [lang,label] of [['en','English'],['ur','اردو']]){
+  const choice = document.createElement('button');
+  choice.type = 'button';
+  choice.lang = lang;
+  choice.textContent = label;
+  choice.onclick = ()=>{
+   aboutLanguage = lang;
+   save('readiq-about-language',lang);
+   showAboutLanguages(false);
+   history.replaceState(null,'','#about');
+   (document.getElementById('iqExploreToggle') || aboutLink).focus();
+   openAbout();
+   window.scrollTo({top:0,behavior:'smooth'});
+  };
+  aboutLanguageMenu.append(choice);
+ }
+ document.body.append(aboutLanguageMenu);
+ document.addEventListener('pointerdown',event=>{
+  if(!aboutLanguageMenu.contains(event.target)&&!aboutLink.contains(event.target))showAboutLanguages(false);
+ });
+ document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&!aboutLanguageMenu.hidden){
+   showAboutLanguages(false);
+   (document.getElementById('iqExploreToggle') || aboutLink).focus();
+  }
+ });
+ window.addEventListener('resize',positionAboutLanguages);
+ window.addEventListener('scroll',positionAboutLanguages,{passive:true});
+}
 window.addEventListener('hashchange',()=>{if(location.hash==='#about')openAbout()});
 if(location.hash==='#about')readingMode='about';
 
