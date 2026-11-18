@@ -309,31 +309,43 @@ html:not(.readiq-mushaf-ready) .iq-bismillah strong { visibility:hidden; }
 .iq-bismillah p[lang="ur"] { font:600 1.2rem/1.8 'Noto Naskh Arabic','Traditional Arabic',serif; }
 .iq-bismillah + .verse, .iq-bismillah + .wb-ayah { margin-top:0; }
 
-/* READIQ_PARA_TITLE_V1 */
+/* READIQ_PARA_TITLE_V2 */
 #content .iq-para-title {
  text-align:center;
- padding:clamp(18px,3vw,32px);
- margin:0 0 1.4rem;
- background:light-dark(#eef7fb,#192e3a);
- color:light-dark(#173c55,#e2f3fa);
- border:1px solid light-dark(#cadee9,#466373);
- border-radius:16px;
+ padding:8px 14px 11px;
+ margin:0 0 12px;
+ background:light-dark(#eaf5fb,#192e3a);
+ color:light-dark(#163649,#e2f3fa);
+ border:1px solid light-dark(#bdd7e6,#466373);
+ border-radius:14px;
+ display:grid;
+ gap:3px;
 }
-.iq-para-title .iq-para-number {
- display:inline-block;
- padding:.32em .85em;
- border-radius:20px;
- background:light-dark(#d8edf7,#2a4d60);
- font:700 .83rem/1.4 system-ui,sans-serif;
-}
-#content .iq-para-title h2 {
- margin:.2em 0;
+#content .iq-para-title .iq-para-head,
+#content .iq-para-title .iq-para-detail {
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ flex-wrap:wrap;
+ gap:4px 12px;
+ margin:0;
  color:inherit;
- font:400 clamp(32px,5vw,60px)/1.8 ReadIQMushaf,serif;
- font-synthesis:none;
 }
-html:not(.readiq-mushaf-ready) .iq-para-title h2 {visibility:hidden}
-#content .iq-para-title p {margin:0;font:600 1rem/1.5 system-ui,sans-serif;}
+#content .iq-para-title .iq-para-head {font:700 1.02rem/1.5 system-ui,sans-serif;}
+#content .iq-para-title .iq-para-number {
+ background:light-dark(#d4ebf7,#2a4d60);
+ border-radius:999px;
+ padding:3px 10px;
+ font:800 .78rem/1.5 system-ui,sans-serif;
+}
+#content .iq-para-title .iq-para-ar {font:400 2rem/1.65 ReadIQMushaf,serif;font-synthesis:none;}
+html:not(.readiq-mushaf-ready) .iq-para-title .iq-para-ar {visibility:hidden;}
+#content .iq-para-title .iq-para-detail {font:400 .85rem/1.5 system-ui,sans-serif;color:light-dark(#37586b,#c2dce8);}
+#content .iq-para-title .iq-para-detail strong {font-weight:600;}
+@media(max-width:420px) {
+ #content .iq-para-title .iq-para-detail {display:grid;gap:3px;}
+ #content .iq-para-title .iq-para-ar {font-size:1.7rem;}
+}
 </style><link id="readiq-practice-style" rel="stylesheet" href="practice.css?v=0bf08f6759f7"><link id="readiq-word-style" rel="stylesheet" href="word-by-word.css?v=0a3193248d279500">
 </head>
 <body><header><div class="brand"><div class="brand-logo">☀️</div><div><h1>IRFAN-UL-QURAN <span class="brand-reflect">· READ • REFLECT</span></h1><small>DeTLeng Read IQ</small></div></div><div class="library-anchor"><button class="file-toggle" id="fileToggle" aria-expanded="false" aria-controls="fileMenu">📚 Library <span id="fileMenuCount">(0)</span> ▾</button><!-- READIQ_ABOUT_V1 --><a class="file-toggle readiq-about-link" href="about.html">About</a></div>
@@ -342,7 +354,7 @@ html:not(.readiq-mushaf-ready) .iq-para-title h2 {visibility:hidden}
 
 <main><div class="hero"><span><span class="status-dot"></span><span id="status">Opening library…</span></span></div>
 <div class="tab-wrap"><nav class="tabs" id="tabs" aria-label="Library documents"></nav></div><section class="reader"><div class="dochead"><h2 id="documentTitle">Welcome to your reading space</h2><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><input class="search" id="search" type="search" placeholder="Find in opened file…" aria-label="Search within document"><span id="languageSummary" class="language-summary"></span><span class="pill" id="fileCount">0 FILES</span></div></div><article class="content" id="content"><div class="empty"><div class="sun">📖</div><h2>Your reading journey starts here</h2><p>Choose a document from the Library to begin reading.</p></div></article></section><div class="footer">Read at your own pace. Reflect on every verse. · <a href="https://www.detleng.com/" target="_blank" rel="noopener noreferrer">Explore DeTLeng ↗</a></div></main>
-<script defer src="app.js?v=8a92a1b6a4b7a4cc"></script>
+<script defer src="app.js?v=8a7528f23b7712c1"></script>
 <script id="readiq-practice-script" defer src="practice.js?v=f0a485342bb298b4"></script>
 <script id="readiq-word-script" defer src="word-by-word.js?v=7628340f085bb6fe"></script>
 <script>

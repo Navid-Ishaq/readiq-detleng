@@ -16,25 +16,65 @@ for(const para of catalogue.folders){const d=document.createElement('details');d
 if(!catalogue.folders.length)fileCards.textContent='No Para folders yet.';document.getElementById('fileMenuCount').textContent='('+catalogue.files.length+')';}
 function selectedLanguages(){return checks.filter(c=>c.checked).map(c=>c.dataset.language)}
 
-// READIQ_PARA_TITLE_V1
+// READIQ_PARA_TITLE_V2
+const paraCardDetails = [
+ ["Alif Lam Mim", "Quranic initials", "Al-Fatihah and Al-Baqarah"],
+ ["Sayaqul", "They will say", "Al-Baqarah"],
+ ["Tilkar Rusul", "Those messengers", "Al-Baqarah and Ali ‘Imran"],
+ ["Lan Tanalu", "You will never attain", "Ali ‘Imran and An-Nisa"],
+ ["Wal Muhsanat", "And married women", "An-Nisa"],
+ ["La Yuhibbullah", "Allah does not like", "An-Nisa and Al-Ma’idah"],
+ ["Wa Idha Sami‘u", "And when they hear", "Al-Ma’idah and Al-An‘am"],
+ ["Wa Law Annana", "And even if We had", "Al-An‘am and Al-A‘raf"],
+ ["Qalal Mala’u", "The chiefs said", "Al-A‘raf and Al-Anfal"],
+ ["Wa‘lamu", "And know", "Al-Anfal and At-Tawbah"],
+ ["Ya‘tadhirun", "They will make excuses", "At-Tawbah to Hud · 3 Surahs"],
+ ["Wa Ma Min Dabbah", "And there is no living creature", "Hud and Yusuf"],
+ ["Wa Ma Ubarri’u", "And I do not absolve", "Yusuf to Ibrahim · 3 Surahs"],
+ ["Rubama", "Perhaps", "Al-Hijr and An-Nahl"],
+ ["Subhanalladhi", "Glory be to Him who", "Al-Isra and Al-Kahf"],
+ ["Qala Alam", "He said, “Did I not…?”", "Al-Kahf to Ta-Ha · 3 Surahs"],
+ ["Iqtaraba", "Has drawn near", "Al-Anbiya and Al-Hajj"],
+ ["Qad Aflaha", "Has certainly succeeded", "Al-Mu’minun to Al-Furqan · 3 Surahs"],
+ ["Wa Qalalladhina", "And those who … said", "Al-Furqan to An-Naml · 3 Surahs"],
+ ["Amman Khalaq", "Or who created…?", "An-Naml to Al-‘Ankabut · 3 Surahs"],
+ ["Utlu Ma Uhiya", "Recite what has been revealed", "Al-‘Ankabut to Al-Ahzab · 5 Surahs"],
+ ["Wa Man Yaqnut", "And whoever devoutly obeys", "Al-Ahzab to Ya-Sin · 4 Surahs"],
+ ["Wa Ma Li", "And what reason have I…?", "Ya-Sin to Az-Zumar · 4 Surahs"],
+ ["Fa Man Azlam", "Then who is more unjust?", "Az-Zumar to Fussilat · 3 Surahs"],
+ ["Ilayhi Yuraddu", "To Him it is referred", "Fussilat to Al-Jathiyah · 5 Surahs"],
+ ["Ha Mim", "Ha, Mim · Quranic initials", "Al-Ahqaf to Adh-Dhariyat · 6 Surahs"],
+ ["Qala Fa Ma Khatbukum", "He said, “Then what is your mission?”", "Adh-Dhariyat to Al-Hadid · 7 Surahs"],
+ ["Qad Sami‘ Allah", "Allah has indeed heard", "Al-Mujadilah to At-Tahrim · 9 Surahs"],
+ ["Tabarakalladhi", "Blessed is He who", "Al-Mulk to Al-Mursalat · 11 Surahs"],
+ ["‘Amma", "About what?", "An-Naba to An-Nas · 37 Surahs"]
+];
 function appendParaTitle() {
  if (readingMode !== 'para') return;
- const names = paraNames[Number(currentPara)-1];
- if (!names) return;
+ const index = Number(currentPara) - 1;
+ const names = paraNames[index];
+ const details = paraCardDetails[index];
+ if (!names || !details) return;
+ const [romanName, meaning, coverage] = details;
  const card = document.createElement('section');
  card.className = 'iq-para-title';
+ const heading = document.createElement('h2');
+ heading.className = 'iq-para-head';
  const number = document.createElement('span');
  number.className = 'iq-para-number';
  number.textContent = 'Para ' + String(currentPara).padStart(2,'0');
- const arabic = document.createElement('h2');
+ const arabic = document.createElement('span');
+ arabic.className = 'iq-para-ar';
  arabic.lang = 'ar';
  arabic.dir = 'rtl';
  arabic.textContent = names[0];
- const roman = document.createElement('p');
- roman.lang = 'en';
- roman.dir = 'ltr';
- roman.textContent = names[1];
- card.append(number,arabic,roman);
+ heading.append(number,arabic,romanName);
+ const detail = document.createElement('div');
+ detail.className = 'iq-para-detail';
+ const surahs = document.createElement('strong');
+ surahs.textContent = coverage;
+ detail.append(meaning,surahs);
+ card.append(heading,detail);
  content.append(card);
 }
 
