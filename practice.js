@@ -172,6 +172,8 @@ $('ip-urdu').onchange=languageChange;$('ip-english').onchange=languageChange;$('
 function setSize(n){fontSize=Math.max(22,Math.min(40,n));root.style.setProperty('--ip-size',fontSize+'px');$('ip-fontsize').value=fontSize;$('ip-fontvalue').textContent=fontSize+'px'}$('ip-smaller').onclick=()=>setSize(fontSize-2);$('ip-larger').onclick=()=>setSize(fontSize+2);$('ip-reset-font').onclick=()=>setSize(28);$('ip-fontsize').oninput=()=>setSize(Number($('ip-fontsize').value));
 root.addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===$('ip-verse')){e.preventDefault();flip()}});
 $('ip-urdu').checked=langs.includes('ur');$('ip-english').checked=langs.includes('en');
+// READIQ_WORD_NAV_V1
+if(context.mode==='word' && context.onExit)$('ip-exit').textContent='← Word-by-Word reading';
 $('ip-exit').onclick=()=>{window.ReadIQPractice.hide();if(context.onExit)context.onExit()};
 $('ip-groups').hidden=false;$('ip-play').hidden=true;renderGroups();
 root.hidden=false;
