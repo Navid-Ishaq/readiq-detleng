@@ -609,6 +609,28 @@ html:not(.readiq-mushaf-ready) #content .iq-surah-ar {visibility:hidden;}
 #content .iq-reflection-status {display:block;text-align:center;font:.8rem/1.5 system-ui,sans-serif}
 #content .iq-reflection-status:empty {display:none}
 @media print {#content .iq-reflection-code button,#content .iq-reflection-status {display:none}}
+
+/* READIQ_LEARN_REFLECTION_V1 */
+#content .iq-reflection-code {flex-wrap:wrap}
+#content .iq-learn-actions {display:inline-flex;align-items:center;gap:6px;margin-inline-start:12px;font:650 .8rem/1.4 system-ui,sans-serif}
+#content .iq-learn-actions button {width:auto;min-width:32px;padding:0 7px;border-radius:12px}
+.iq-learn-dialog {
+ position:fixed;inset:12px 12px 12px auto;margin:0;width:min(530px, calc(100% - 24px));
+ max-width:none;max-height:calc(100dvh - 24px);overflow:auto;
+ padding:20px;border:1px solid #90b9c7;border-radius:14px;
+ background:light-dark(#fffefa,#182b35);color:light-dark(#183947,#edf9fc);
+}
+.iq-learn-dialog::backdrop {background:#102b3955}
+.iq-learn-dialog.iq-learn-expanded {inset:12px;margin:auto;width:min(900px, calc(100% - 24px))}
+.iq-learn-dialog h2 {margin:0;font:750 1.3rem/1.45 system-ui,sans-serif}
+.iq-learn-dialog article {font:1.05rem/1.8 system-ui,sans-serif;overflow-wrap:anywhere}
+.iq-learn-dialog article [dir=rtl] {line-height:2}
+.iq-learn-dialog article [lang=ar] {font:1.6rem/2 ReadIQMushaf,serif}
+.iq-learn-dialog p {white-space:pre-wrap}
+.iq-learn-dialog button {padding:6px 10px;border:1px solid #90b9c7;border-radius:8px;background:#155160;color:#fff;cursor:pointer}
+.iq-learn-controls {margin-top:8px}
+.iq-learn-explanation {border-top:1px solid #90b9c7;margin-top:1em}
+@media print {#content .iq-learn-actions,.iq-learn-dialog {display:none}}
 </style><link id="readiq-practice-style" rel="stylesheet" href="practice.css?v=0bf08f6759f7"><link id="readiq-word-style" rel="stylesheet" href="word-by-word.css?v=0a3193248d279500">
 </head>
 <body><header><div class="brand"><div class="brand-logo">☀️</div><div><h1>IRFAN-UL-QURAN <span class="brand-reflect">· READ • REFLECT</span></h1><small>DeTLeng Read IQ</small></div></div><div class="library-anchor"><button class="file-toggle" id="fileToggle" aria-expanded="false" aria-controls="fileMenu">📚 Library <span id="fileMenuCount">(0)</span> ▾</button><!-- READIQ_ABOUT_V1 --><a class="file-toggle readiq-about-link" href="about.html">About</a></div>
@@ -623,7 +645,7 @@ html:not(.readiq-mushaf-ready) #content .iq-surah-ar {visibility:hidden;}
 
 <main><div class="hero"><span><span class="status-dot"></span><span id="status">Opening library…</span></span></div>
 <div class="tab-wrap"><nav class="tabs" id="tabs" aria-label="Library documents"></nav></div><section class="reader"><div class="dochead"><h2 id="documentTitle">Welcome to your reading space</h2><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><input class="search" id="search" type="search" placeholder="Find in opened file…" aria-label="Search within document"><span id="languageSummary" class="language-summary"></span><span class="pill" id="fileCount">0 FILES</span></div></div><article class="content" id="content"><div class="empty"><div class="sun">📖</div><h2>Your reading journey starts here</h2><p>Choose a document from the Library to begin reading.</p></div></article></section><div class="footer">Read at your own pace. Reflect on every verse. · <a href="https://www.detleng.com/" target="_blank" rel="noopener noreferrer">Explore DeTLeng ↗</a></div></main>
-<script defer src="app.js?v=fb5815b4e03ca0df"></script>
+<script defer src="app.js?v=654deccd061fd739"></script>
 <script id="readiq-practice-script" defer src="practice.js?v=98f15cc15a9eb5c3"></script>
 <script id="readiq-word-script" defer src="word-by-word.js?v=c7ae0583b872aa09"></script>
 <script>

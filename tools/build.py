@@ -88,6 +88,113 @@ def index_surahs(payloads):
   metadata.append({'number':number,'count':len(ordered),'expected':expected,'complete':complete,'url':url})
  return metadata,additions
 
+# READIQ_LEARN_REFLECTION_V1
+"""Import finished verse reflections from the Read IQ Word templates."""
+
+REFLECTION_NS = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+W = '{' + REFLECTION_NS['w'] + '}'
+CODE = re.compile(r'P(\d+)[-–]S(\d+)[-–](\d+)')
+FILENAME = re.compile(r'P(\d{2})-Q(0[1-4])-(UR|EN)\.docx')
+PLACEHOLDERS = {
+    'EN': 'Explanation in progress. Coming soon.',
+    'UR': 'اس آیت کی وضاحت زیرِ تیاری ہے اور جلد شامل کی جائے گی۔',
+}
+
+
+def verse_key(text):
+    match = CODE.fullmatch(text.strip())
+    if not match:
+        raise ValueError(f'Invalid verse code: {text}')
+    return ':'.join(str(int(part)) for part in match.groups())
+
+
+def paragraph_style(paragraph):
+    style = paragraph.find('./w:pPr/w:pStyle', REFLECTION_NS)
+    return style.get(W+'val', '') if style is not None else ''
+
+
+def paragraph_parts(paragraph):
+    parts = []
+    for run in paragraph.iter(W+'r'):
+        text = []
+        for child in run:
+            if child.tag == W+'t':
+                text.append(child.text or '')
+            elif child.tag in (W+'br', W+'cr'):
+                text.append('\n')
+            elif child.tag == W+'tab':
+                text.append('\t')
+        if not text:
+            continue
+        bold = run.find('./w:rPr/w:b', REFLECTION_NS)
+        is_bold = bold is not None and bold.get(W+'val', '1') not in ('0', 'false', 'off')
+        parts.append([''.join(text), is_bold])
+    return parts
+
+
+def import_reflections(root, items, payloads):
+    quarters = {}
+    owners = {}
+    for item in items:
+        quarter = (item['para'], item['quarter'])
+        codes = {verse_key(verse['code']) for verse in payloads[item['url']]['verses']}
+        for key in codes:
+            if key in owners:
+                raise ValueError(f'Duplicate Library verse code {key}')
+            owners[key] = quarter
+        quarters[quarter] = codes
+
+    folder = Path(root) / 'ReadIQ-Reflections'
+    records = {}
+    seen = set()
+    for path in sorted(folder.glob('*/*.docx')):
+        if path.name.startswith('~$'):
+            continue
+        match = FILENAME.fullmatch(path.name)
+        if not match or path.parent.name != match[3]:
+            raise ValueError(f'{path.name}: expected EN or UR folder and matching Pnn-Qnn-LANG.docx name')
+        para, quarter = map(int,match.groups()[:2])
+        lang = match[3]
+        with zipfile.ZipFile(path) as doc:
+            body = ET.fromstring(doc.read('word/document.xml')).find('w:body', REFLECTION_NS)
+        key = None
+        identification_pending = False
+        for paragraph in list(body):
+            if paragraph.tag != W+'p':
+                continue
+            parts = paragraph_parts(paragraph)
+            text = ''.join(part[0] for part in parts).strip()
+            if not text:
+                continue
+            style = paragraph_style(paragraph)
+            if style == 'VerseCode':
+                if identification_pending:
+                    raise ValueError(f'{path.name}: missing identification for {key}')
+                key = verse_key(text)
+                if int(key.split(':')[0]) != para:
+                    raise ValueError(f'{path.name}: wrong Para for {text}')
+                if (key,lang) in seen:
+                    raise ValueError(f'{path.name}: duplicate code {text}')
+                seen.add((key,lang))
+                if owners.get(key) not in (None,(para,quarter)) or ((para,quarter) in quarters and key not in quarters[para,quarter]):
+                    raise ValueError(f'{path.name}: {text} does not belong to this Library quarter')
+                identification_pending = True
+                continue
+            if key is None:
+                raise ValueError(f'{path.name}: text found before the first Verse Code paragraph')
+            if identification_pending:
+                identification_pending = False
+                continue
+            if text == PLACEHOLDERS[lang]:
+                continue
+            if key not in owners:
+                raise ValueError(f'{path.name}: finished reflection has no matching Library verse ({key})')
+            tag = {'Heading1':'h3','Heading2':'h3','Heading3':'h4'}.get(style,'p')
+            records.setdefault(key,{}).setdefault(lang.lower(),[]).append([tag,parts])
+        if identification_pending:
+            raise ValueError(f'{path.name}: missing identification for {key}')
+    return records
+
 def build():
  if not CONTENT.is_dir():raise ValueError('Missing content folder: Read Irfanul Quran')
  items=[];payloads={};all_keys=set()
@@ -111,6 +218,12 @@ def build():
  surahs,surah_payloads=index_surahs(payloads)
  catalogue['surahs']=surahs
  payloads.update(surah_payloads)
+ reflections = import_reflections(ROOT, items, payloads)
+ reflection_json = json.dumps(reflections,ensure_ascii=False)
+ reflection_hash = hashlib.sha256(reflection_json.encode()).hexdigest()[:16]
+ reflection_url = f'documents/reflections-{reflection_hash}.json'
+ catalogue['reflections'] = reflection_url
+ payloads[reflection_url] = reflections
  catalogue['revision']=hashlib.sha256(json.dumps(catalogue,ensure_ascii=False,sort_keys=True).encode()).hexdigest()[:16]
  # Parse everything before touching the previous generated snapshot.
  stage=ROOT/'_site-next';out=ROOT/'_site'

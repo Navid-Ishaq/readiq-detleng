@@ -137,19 +137,135 @@ function appendSurahHeading(code) {
 const reflectionPrompts = {
  ur: {
   title:'قرآنی غور و فکر — سمجھ سے عمل تک',
-  instructions:'صرف نیچے دی گئی ایک آیت کی وضاحت نرم، سادہ اور رواں اردو رسم الخط میں لکھیے۔ پہلے درج شدہ ریکارڈ بعینہٖ نقل کیجیے۔ کوڈ، نام، نمبر، اعراب، املا، رموزِ اوقاف اور تینوں متن اپنی اصل صورت میں رکھیے۔ پھر ایک یا دو نرم تعارفی جملوں سے وضاحت شروع کیجیے۔ آیت کے مطابق واضح عنوانات اور مربوط پیراگراف استعمال کیجیے۔ پہلے براہِ راست مطلب اور اہم الفاظ سمجھائیے، پھر عملی غور و فکر الگ واضح کیجیے۔ دوسری آیات، تاریخی پس منظر اور بیرونی حوالے شامل نہ کیجیے۔ جہاں معنی واضح نہ ہو، غیر یقینی بات کو یقینی نہ کہیں۔ روزمرہ کی ایک مثال، آج سے شروع کرنے کا ایک چھوٹا قدم، مناسب مدت اور پیش رفت کا جائزہ لینے کا طریقہ دیجیے۔ اہم نکات نمایاں کیجیے۔ وضاحت کی طوالت تینوں اصل متون کے مجموعی الفاظ سے تقریباً چھ گنا ہو، دس فی صد کی گنجائش کے ساتھ۔ ابتدائی ریکارڈ، تعارفی جملے اور عنوانات اس گنتی سے خارج ہیں۔ سلام، رسمی افتتاح، فہرست، جدول اور تحریری جواب طلب کرنے والے سوالات شامل نہ کیجیے۔ صرف اصل ریکارڈ اور اردو وضاحت دیجیے۔',
+  instructions:'صرف نیچے دی گئی ایک آیت کی وضاحت نرم، سادہ اور رواں اردو رسم الخط میں لکھیے۔ درج شدہ کوڈ، تعارفی حوالہ اور تینوں متون صرف وضاحت کے لیے استعمال کیجیے۔ جواب ایک یا دو نرم تعارفی جملوں سے شروع کیجیے۔ آیت کے مطابق واضح عنوانات اور مربوط پیراگراف استعمال کیجیے۔ پہلے براہِ راست مطلب اور اہم الفاظ سمجھائیے، پھر عملی غور و فکر الگ واضح کیجیے۔ دوسری آیات، تاریخی پس منظر اور بیرونی حوالے شامل نہ کیجیے۔ جہاں معنی واضح نہ ہو، غیر یقینی بات کو یقینی نہ کہیں۔ روزمرہ کی ایک مثال، آج سے شروع کرنے کا ایک چھوٹا قدم، مناسب مدت اور پیش رفت کا جائزہ لینے کا طریقہ دیجیے۔ اہم نکات نمایاں کیجیے۔ وضاحت کی طوالت تینوں اصل متون کے مجموعی الفاظ سے تقریباً چھ گنا ہو، دس فی صد کی گنجائش کے ساتھ۔ تعارفی جملے اور عنوانات اس گنتی سے خارج ہیں۔ سلام، رسمی افتتاح، فہرست، جدول اور تحریری جواب طلب کرنے والے سوالات شامل نہ کیجیے۔ صرف اردو وضاحت دیجیے۔ کوڈ، حوالہ جاتی جملہ، مکمل عربی آیت یا دونوں مکمل تراجم جواب میں دوبارہ شامل نہ کیجیے۔',
   labels:['آیت کا کوڈ','پارے کا نمبر','پارے کا عربی نام','سورت کا نمبر','سورت کا عربی نام','آیت کا نمبر','مکمل عربی آیت','مکمل اردو ترجمہ','مکمل انگریزی ترجمہ'],
   button:'اردو وضاحت کی ہدایت نقل کریں',
   copied:'اردو ہدایت نقل ہو گئی'
  },
  en: {
   title:'Qur’anic Reflection: From Understanding to Action',
-  instructions:'Explain only the single verse supplied below in warm, clear everyday English. First reproduce the supplied record exactly, preserving its code, names, numbers, wording, punctuation, diacritics and line breaks. Then begin the reflection with one or two gentle introductory sentences. Use descriptive headings and connected paragraphs. Explain the direct meaning and important wording first, then distinguish practical reflections from the verse’s direct teaching. Use only the supplied verse and translations. Do not introduce another verse, historical background, or external citations. Acknowledge uncertainty where appropriate. Include one ordinary example, one small action to start today, a realistic time frame and a way to review progress and adjust. Bold important ideas. Aim for a reflection six times the combined word count of the three supplied texts, within ten percent, excluding the record, introduction and headings. Omit opening formulas, bullets, tables and questions requiring written answers. Return only the unchanged record and the English reflection.',
+  instructions:'Explain only the single verse supplied below in warm, clear everyday English. Use the supplied code, identification sentence, and three texts as input. Begin the reflection with one or two gentle introductory sentences. Use descriptive headings and connected paragraphs. Explain the direct meaning and important wording first, then distinguish practical reflections from the verse’s direct teaching. Use only the supplied verse and translations. Do not introduce another verse, historical background, or external citations. Acknowledge uncertainty where appropriate. Include one ordinary example, one small action to start today, a realistic time frame and a way to review progress and adjust. Bold important ideas. Aim for a reflection six times the combined word count of the three supplied texts, within ten percent, excluding the introduction and headings. Omit opening formulas, bullets, tables and questions requiring written answers. Return only the English reflection. Omit the verse code, identification sentence, complete Arabic verse and both complete translations from the answer.',
   labels:['Verse code','Para number','Para name in Arabic','Surah number','Surah name in Arabic','Verse number','Complete Arabic verse','Complete Urdu translation','Complete English translation'],
   button:'Copy English reflection prompt',
   copied:'English prompt copied'
  }
 };
+// READIQ_LEARN_REFLECTION_V1
+function reflectionReference(verse,lang){
+ const match = /^P(\d+)[-–]S(\d+)[-–](\d+)$/.exec(verse.code);
+ if (!match) return null;
+ const [para,surah,ayah] = match.slice(1).map(Number);
+ const arabicPara = paraNames[para-1]?.[0];
+ const arabicSurah = surahHeadingData[surah]?.[0];
+ const englishPara = paraCardDetails[para-1]?.[0];
+ const englishSurah = surahNames[surah-1]?.[0];
+ if (!arabicPara || !arabicSurah || !englishPara || !englishSurah) return null;
+ const ur = `یہ سورۃ ${arabicSurah} کی آیت ${ayah} ہے، جو قرآنِ مجید کے پارہ نمبر ${para}، ${arabicPara}، میں ہے۔`;
+ const en = `This is verse ${ayah} of Surah ${englishSurah[0].toUpperCase()+englishSurah.slice(1)} (${arabicSurah}) in Para ${para}, ${englishPara} (${arabicPara}), of the Qur’an.`;
+ return {key:[para,surah,ayah].join(':'), sentence:lang==='ur' ? ur.replace(/[0-9]/g,d=>'۰۱۲۳۴۵۶۷۸۹'[Number(d)]) : en};
+}
+let learnDialog, learnRequest = 0;
+const reflectionCache = new Map();
+function reflectionIndex(url){
+ if (!url) return Promise.resolve({});
+ if (!reflectionCache.has(url)){
+  reflectionCache.set(url, fetch(url).then(response=>{
+   if (!response.ok) throw Error('Reflection index unavailable');
+   return response.json();
+  }).catch(error=>{reflectionCache.delete(url);throw error}));
+ }
+ return reflectionCache.get(url);
+}
+function reflectionElement(tag, text, lang){
+ const element = document.createElement(tag);
+ element.textContent = text;
+ if (lang){
+  element.lang = lang;
+  element.dir = lang === 'en' ? 'ltr' : 'rtl';
+ }
+ return element;
+}
+async function openLearnReflection(verse,lang,opener){
+ const ref = reflectionReference(verse,lang);
+ if (!ref) return;
+ const request = ++learnRequest;
+ const ur = lang === 'ur';
+ if (!learnDialog){
+  learnDialog = document.createElement('dialog');
+  learnDialog.className = 'iq-learn-dialog';
+  learnDialog.setAttribute('aria-labelledby','iqLearnTitle');
+  document.body.append(learnDialog);
+ }
+ const dialog = learnDialog;
+ const heading = reflectionElement('h2',verse.code,'en');
+ heading.id = 'iqLearnTitle';
+ const close = reflectionElement('button',ur?'بند کریں':'Close',lang);
+ close.type='button';
+ close.onclick=()=>dialog.close();
+ dialog.onclose=()=>{++learnRequest;opener.focus()};
+ dialog.classList.remove('iq-learn-expanded');
+ const body = document.createElement('article');
+ body.lang=lang;
+ body.dir=ur?'rtl':'ltr';
+ const tools = document.createElement('div');
+ tools.className='iq-learn-controls';
+ tools.append(close);
+ dialog.replaceChildren(heading,tools,body);
+ body.append(reflectionElement('p',ref.sentence,lang));
+ for (const [source,language] of [[verse.ar,'ar'],[verse.ur,'ur'],[verse.en,'en']]){
+  body.append(reflectionElement('p',source,language));
+ }
+ const status=reflectionElement('p',ur?'وضاحت کھل رہی ہے…':'Opening explanation…',lang);
+ status.setAttribute('role','status');
+ body.append(status);
+ if (!dialog.open) dialog.showModal();
+ dialog.scrollTop=0;
+ try {
+  const index=await reflectionIndex(catalogue.reflections);
+  if (request!==learnRequest || !dialog.open) return;
+  const blocks=index[ref.key]?.[lang];
+  if (!blocks?.length){
+   status.textContent=ur?'اس آیت کی وضاحت زیرِ تیاری ہے اور جلد شامل کی جائے گی۔':'Explanation in progress. Coming soon.';
+   return;
+  }
+  const explanation=document.createElement('section');
+  explanation.className='iq-learn-explanation';
+  for (const [type,parts] of blocks){
+   const block=document.createElement(['h3','h4'].includes(type)?type:'p');
+   for (const [value,bold] of parts){
+    block.append(bold?reflectionElement('strong',value):document.createTextNode(value));
+   }
+   explanation.append(block);
+  }
+  status.replaceWith(explanation);
+  const expand=reflectionElement('button',ur?'مکمل وضاحت دیکھیے':'Open full explanation',lang);
+  expand.type='button';
+  expand.setAttribute('aria-expanded','false');
+  expand.onclick=()=>{
+   const expanded=dialog.classList.toggle('iq-learn-expanded');
+   expand.setAttribute('aria-expanded',String(expanded));
+   expand.textContent=expanded?(ur?'مختصر منظر':'Compact view'):(ur?'مکمل وضاحت دیکھیے':'Open full explanation');
+  };
+  body.append(expand);
+ } catch {
+  if (request===learnRequest) status.textContent=ur?'وضاحت نہیں کھل سکی۔ دوبارہ کوشش کیجیے۔':'Could not open the explanation. Please try again.';
+ }
+}
+function appendLearnButtons(row,verse){
+ const group = document.createElement('span');
+ group.className='iq-learn-actions';
+ group.append(reflectionElement('span','وضاحت · Explanation'));
+ for (const [lang,label] of [['ur','LU'],['en','LE']]){
+  const button=reflectionElement('button',label);
+  button.type='button';
+  button.title=lang==='ur'?'اردو وضاحت پڑھیے':'Read English explanation';
+  button.setAttribute('aria-label',button.title);
+  button.onclick=()=>openLearnReflection(verse,lang,button);
+  group.append(button);
+ }
+ row.append(group);
+}
+
 function reflectionText(verse, language){
  const code = /^P(\d+)[-–]S(\d+)[-–](\d+)$/.exec(verse.code);
  if (!code) return '';
@@ -158,7 +274,9 @@ function reflectionText(verse, language){
  if (values.some(value => typeof value !== 'string' || !value.trim())) return '';
  const prompt = reflectionPrompts[language];
  const record = prompt.labels.map((label,index) => label + (index < 6 ? ': ' : '\n') + values[index]);
- return [prompt.title,prompt.instructions,...record].join('\n\n');
+ const reference = reflectionReference(verse,language);
+ if (!reference) return '';
+ return [prompt.title,prompt.instructions,verse.code,reference.sentence,...record.slice(6)].join('\n\n');
 }
 async function copyReflection(text){
  try {
@@ -202,6 +320,7 @@ function appendReflectionCode(section, code, verse){
   return button;
  });
  row.append(buttons[0],code,buttons[1]);
+ appendLearnButtons(row,verse);
  section.append(row,status);
 }
 
