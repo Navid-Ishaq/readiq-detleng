@@ -224,6 +224,26 @@ def build():
  reflection_url = f'documents/reflections-{reflection_hash}.json'
  catalogue['reflections'] = reflection_url
  payloads[reflection_url] = reflections
+ # READIQ_VERSE_RANGE_V1
+ surah_offsets = [0]
+ for length in SURAH_EXPECTED:
+  surah_offsets.append(surah_offsets[-1] + length)
+ verse_rows = []
+ seen_ayahs = set()
+ for item in items:
+  for offset, verse in enumerate(payloads[item['url']]['verses']):
+   para, surah, ayah = map(int,verse_key(verse['code']).split(':'))
+   ordinal = surah_offsets[surah-1] + ayah
+   if ordinal in seen_ayahs or para != item['para']:
+    raise ValueError('Duplicate verse or incorrect Para in Library: '+verse['code'])
+   seen_ayahs.add(ordinal)
+   verse_rows.append([para,surah,ayah,item['id'],offset,ordinal])
+ verse_rows.sort(key=lambda row:row[5])
+ verse_index = {'rows':verse_rows,'limits':SURAH_EXPECTED}
+ verse_index_hash = hashlib.sha256(json.dumps(verse_index).encode()).hexdigest()[:16]
+ verse_index_url = f'documents/verse-index-{verse_index_hash}.json'
+ catalogue['verseIndex'] = verse_index_url
+ payloads[verse_index_url] = verse_index
  catalogue['revision']=hashlib.sha256(json.dumps(catalogue,ensure_ascii=False,sort_keys=True).encode()).hexdigest()[:16]
  # Parse everything before touching the previous generated snapshot.
  stage=ROOT/'_site-next';out=ROOT/'_site'

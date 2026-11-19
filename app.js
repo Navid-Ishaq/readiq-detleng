@@ -359,7 +359,7 @@ function highlight(){content.querySelectorAll('mark').forEach(m=>m.replaceWith(d
 checks.forEach(c=>c.onchange=()=>{save('readiq-languages',selectedLanguages());render()});search.oninput=()=>{highlight();content.querySelector('mark')?.scrollIntoView({block:'center',behavior:'smooth'})};
 async function openFile(file){window.ReadIQWordByWord?.hide();window.ReadIQPractice?.hide();clearAsmaHash();readingMode='quarter';save('readiq-mode','quarter');selected=file;save('readiq-selected',file.id);renderLibrary();renderParasMenu();renderSurahsMenu();const n=++token;verses=[];search.value='';title.textContent='Para-'+String(file.para).padStart(2,'0')+' · '+file.label;content.textContent='Opening quarter…';try{const r=await fetch(file.url,{cache:'no-store'});if(!r.ok)throw Error('Cannot open quarter');const data=await r.json();if(n!==token)return;verses=data.verses;render();document.getElementById('status').textContent=verses.length+' verses in this quarter'}catch(e){if(n===token)content.textContent=e.message}}
 async function refresh(){if(polling)return;polling=true;try{const r=await fetch('library.json',{cache:'no-store'});if(!r.ok)throw Error('Library unavailable');const next=await r.json();if(next.revision===revision)return;catalogue=next;revision=next.revision;renderLibrary();renderParasMenu();renderSurahsMenu();const id=selected?.id||saved('readiq-selected',null),chosen=catalogue.files.find(f=>f.id===id)||catalogue.files[0];if(readingMode==='selected-surahs'){renderSelectedSurahs();return;}
-if(readingMode==='selected-verses')return;
+if(readingMode==='selected-verses'||readingMode==='verse-range')return;
 if(readingMode==='asma')openAsma(asmaKind);else if(readingMode==='about')await openAbout();else if(readingMode==='surah')await openSurah(currentSurah);else if(readingMode==='para')await openPara(currentPara);else if(chosen)await openFile(chosen);else{selected=null;verses=[];++token;title.textContent='Irfan-ul-Quran';render();document.getElementById('status').textContent='Add quarter files to begin'}}catch{document.getElementById('status').textContent='Library unavailable. Please refresh.'}finally{polling=false}}
 let font=Number(saved('readiq-font',31));if(!Number.isFinite(font))font=31;
 function setFont(v){font=Math.max(18,Math.min(72,Number(v)));document.documentElement.style.setProperty('--size',font+'px');slider.value=font;fontValue.textContent=font+'px';save('readiq-font',font)}
@@ -663,11 +663,14 @@ window.ReadIQWordBridge={
 window.ReadIQPracticeBridge={
  // READIQ_READING_PRACTICE_V1
  readingSelection(){
+  if (readingMode==='verse-range' && verses.length){
+   return {mode:'range',title:title.textContent,codes:verses.map(verse=>verse.code),quarterIds:selected.quarterIds};
+  }
   if (!['quarter','para','surah'].includes(readingMode) || !verses.length) return null;
   return window.ReadIQWordBridge.selection();
  },
  snapshot(){
-  if(!['quarter','para','surah'].includes(readingMode)||!Array.isArray(verses)||!verses.length)throw Error('Open a Quarter, Para or Surah and wait for its verses to load first.');
+  if(!['quarter','para','surah','verse-range'].includes(readingMode)||!Array.isArray(verses)||!verses.length)throw Error('Open a Quarter, Para, Surah or verse range first.');
   const clean=v=>({code:String(v.code),ar:cleanArabicEnd(v.ar),ur:cleanTranslationMarkers(v.ur),en:cleanTranslationMarkers(v.en)});
   const rows=verses.map(clean);
   if(rows.some(v=>!v.code||!v.ar||!v.ur||!v.en))throw Error('Some verse fields are missing. Practice cannot start with incomplete content.');
@@ -866,6 +869,162 @@ async function openSelectedVerses(item){
  }
 }
 
+// READIQ_VERSE_RANGE_V1
+const rangeDialog = document.getElementById('iqVerseRange');
+const rangeForm = document.getElementById('iqRangeForm');
+const rangeFields = [...rangeForm.querySelectorAll('fieldset')];
+const rangeSingle = document.getElementById('iqRangeSingle');
+const rangeCopy = document.getElementById('iqRangeCopy');
+const rangeSubmit = document.getElementById('iqRangeDisplay');
+const rangeStatus = document.getElementById('iqRangeStatus');
+let rangeIndexPromise, rangeIndexUrl, rangeRequest = 0;
+
+function verseRangeIndex(){
+ const url = catalogue.verseIndex;
+ if (!url) return Promise.reject(Error('The Library index is not ready yet. Try again in a moment.'));
+ if (!rangeIndexPromise || rangeIndexUrl !== url){
+  rangeIndexUrl = url;
+  const pending = fetch(url).then(response=>{
+   if (!response.ok) throw Error('Could not load the verse index.');
+   return response.json();
+  }).then(({rows,limits})=>({
+   rows, limits, positions:new Map(rows.map((row,index)=>[row[1]+':'+row[2],index]))
+  })).catch(error=>{
+   if (rangeIndexPromise===pending) rangeIndexPromise=null;
+   throw error;
+  });
+  rangeIndexPromise = pending;
+ }
+ return rangeIndexPromise;
+}
+function rangeInputs(field){return [...field.querySelectorAll('input')]}
+function copyRangeStart(){
+ const values=rangeInputs(rangeFields[0]).map(input=>input.value);
+ rangeInputs(rangeFields[1]).forEach((input,index)=>input.value=values[index]);
+}
+function validateRangeEnd(field,index){
+ const [para,surah,ayah]=rangeInputs(field).map(input=>input.valueAsNumber);
+ const output=field.querySelector('output'), fix=field.querySelector('button');
+ const position=index.positions.get(surah+':'+ayah);
+ const row=index.rows[position];
+ const last=index.limits[surah-1];
+ let message='';
+ fix.hidden=true;
+ if (!Number.isInteger(para)||para<1||para>30) message='Enter a Para number from 1 to 30.';
+ else if (!Number.isInteger(surah)||surah<1||surah>114) message='Enter a Surah number from 1 to 114.';
+ else if (!Number.isInteger(ayah)||ayah<1||ayah>last) message='The last verse of '+surahNames[surah-1][0]+' is '+last+'. Enter a number from 1 to '+last+'.';
+ else if (!row) message='This ayat is not available in the Library yet.';
+ else if (row[0]!==para){
+  const correct=String(row[0]).padStart(2,'0');
+  message='This ayat is in Para '+correct+'.';
+  fix.hidden=field.disabled;
+  fix.textContent='Use Para '+correct;
+  fix.onclick=()=>{
+   rangeInputs(field)[0].value=row[0];
+   rangeCopy.checked=false;
+   refreshRangeInputs();
+  };
+ }
+ output.classList.toggle('iq-range-error',Boolean(message));
+ output.textContent=message || 'P'+String(para).padStart(2,'0')+'-S'+surah+'-'+ayah;
+ return message ? null : position;
+}
+function syncRangeControls(){
+ if (rangeSingle.checked){
+  rangeCopy.checked=false;
+  copyRangeStart();
+ }
+ rangeCopy.disabled=rangeSingle.checked;
+ rangeFields[1].disabled=rangeSingle.checked;
+ rangeSubmit.textContent=rangeSingle.checked?'Display verse →':'Display range →';
+}
+async function refreshRangeInputs(){
+ syncRangeControls();
+ const ticket=++rangeRequest;
+ rangeStatus.textContent='';
+ try {
+  const index=await verseRangeIndex();
+  if (ticket!==rangeRequest || !rangeDialog.open) return;
+  rangeFields.forEach(field=>validateRangeEnd(field,index));
+ } catch(error){
+  if (ticket===rangeRequest) rangeStatus.textContent=error.message;
+ }
+}
+function openVerseFinder(){
+ if (rangeDialog.open) return;
+ const first=verses[0] && normalizeSelectedCode(verses[0].code);
+ if (first && !rangeInputs(rangeFields[0])[0].value){
+  const values=first.split(':');
+  for (const field of rangeFields) rangeInputs(field).forEach((input,i)=>input.value=values[i]);
+ }
+ rangeDialog.showModal();
+ refreshRangeInputs();
+}
+rangeForm.addEventListener('input',event=>{
+ if (event.target===rangeCopy && rangeCopy.checked) copyRangeStart();
+ if (rangeFields.some(field=>field.contains(event.target))) rangeCopy.checked=false;
+ refreshRangeInputs();
+});
+rangeDialog.addEventListener('close',()=>{
+ ++rangeRequest;
+ rangeSubmit.disabled=false;
+ if (readingMode==='verse-range') title.focus();
+ else exploreToggle.focus();
+});
+rangeForm.onsubmit=async event=>{
+ event.preventDefault();
+ syncRangeControls();
+ const ticket=++rangeRequest, readingToken=token;
+ const currentIndex=catalogue.verseIndex;
+ rangeStatus.textContent='';
+ rangeSubmit.disabled=true;
+ try{
+  const index=await verseRangeIndex();
+  if (ticket!==rangeRequest || !rangeDialog.open) return;
+  const from=validateRangeEnd(rangeFields[0],index), to=validateRangeEnd(rangeFields[1],index);
+  if (from===null || to===null) return;
+  if (to<from) throw Error('To comes before From. Choose a later endpoint.');
+  const rows=index.rows.slice(from,to+1);
+  if (rows.at(-1)[5]-rows[0][5]+1!==rows.length) throw Error('Some ayat in this range are missing from the Library.');
+  const files=new Map(catalogue.files.map(file=>[file.id,file]));
+  const ids=[...new Set(rows.map(row=>row[3]))];
+  rangeStatus.textContent='Opening selected ayat…';
+  const pages=await Promise.all(ids.map(async id=>{
+   const response=await fetch(files.get(id).url);
+   if (!response.ok) throw Error('Could not load a Library quarter. Please try again.');
+   const page=await response.json();
+   return [id,page.verses];
+  }));
+  if (ticket!==rangeRequest || !rangeDialog.open || readingToken!==token) return;
+  if (catalogue.verseIndex!==currentIndex) throw Error('The Library changed. Please try again.');
+  const byFile=new Map(pages);
+  const records=rows.map(([p,s,a,id,offset])=>{
+   const verse=byFile.get(id)?.[offset];
+   if (!verse || normalizeSelectedCode(verse.code)!==[p,s,a].join(':')) throw Error('The verse index does not match the Library.');
+   return verse;
+  });
+  ++token;
+  window.ReadIQWordByWord?.hide();
+  window.ReadIQPractice?.hide();
+  clearAsmaHash();
+  readingMode='verse-range';
+  const first=records[0].code,last=records.at(-1).code;
+  selected={id:'range-'+first+'-'+last, quarterIds:ids};
+  verses=records;
+  search.value='';
+  title.textContent=first===last?first:first+' → '+last;
+  title.tabIndex=-1;
+  document.getElementById('status').textContent=records.length+' '+(records.length===1?'verse':'verses')+' · Verse selection';
+  render();
+  rangeDialog.close();
+  window.scrollTo(0,0);
+ } catch(error){
+  if (ticket===rangeRequest) rangeStatus.textContent=error.message;
+ } finally {
+  rangeSubmit.disabled=false;
+ }
+};
+
 const exploreToggle = document.createElement('button');
 exploreToggle.id = 'iqExploreToggle';
 exploreToggle.type = 'button';
@@ -885,7 +1044,12 @@ selectedSurahsButton.type = 'button';
 selectedSurahsButton.className = 'file-toggle';
 bilingualLabel(selectedSurahsButton, '☆ Selected Surahs', 'منتخب سورتیں');
 selectedSurahsButton.onclick = openSelectedSurahs;
-for(const control of [fileToggle,paraToggle,selectedSurahsButton,surahToggle,asmaToggle,aboutLink]){
+const findVerseButton = document.createElement('button');
+findVerseButton.type = 'button';
+findVerseButton.className = 'file-toggle';
+findVerseButton.textContent = '🔎 Find by Verse Code';
+findVerseButton.onclick = openVerseFinder;
+for(const control of [findVerseButton,fileToggle,paraToggle,selectedSurahsButton,surahToggle,asmaToggle,aboutLink]){
  exploreMenu.append(control);
 }
 function positionExplore() {

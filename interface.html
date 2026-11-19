@@ -632,6 +632,30 @@ html:not(.readiq-mushaf-ready) #content .iq-surah-ar {visibility:hidden;}
 .iq-learn-controls {display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .iq-learn-explanation {border-top:1px solid #90b9c7;margin-top:1em}
 @media print {#content .iq-learn-actions,.iq-learn-dialog {display:none}}
+/* READIQ_VERSE_RANGE_V1 */
+#iqVerseRange {
+ box-sizing:border-box;width:min(810px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:auto;
+ border:1px solid #9ac1d2;border-radius:14px;padding:20px;
+ color:light-dark(#173a50,#f0f9fd);background:light-dark(#fffefa,#192f3d);
+}
+#iqVerseRange::backdrop {background:#102b3966}
+#iqVerseRange h2 {margin:0 60px 12px 0}
+#iqVerseRange .iq-range-close {position:absolute;top:16px;right:16px}
+.iq-range-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.iq-range-fields {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#iqVerseRange fieldset {min-width:0;margin:0;padding:10px;border:1px solid #9ac1d2;border-radius:10px}
+#iqVerseRange legend {font-weight:700}
+#iqVerseRange input[type=number] {
+ box-sizing:border-box;display:block;width:100%;margin-top:4px;padding:6px;border:1px solid #9ac1d2;border-radius:6px;font:inherit;
+}
+#iqVerseRange output {display:block;margin:8px 0;min-height:1.3em;font-weight:650}
+#iqVerseRange .iq-range-error {color:light-dark(#962d25,#ffb0a6)}
+.iq-range-actions {display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:14px}
+#iqVerseRange button {padding:7px 10px;border:1px solid #a8cbd9;border-radius:7px;background:light-dark(#eaf6fb,#284859);color:inherit;cursor:pointer}
+#iqVerseRange #iqRangeDisplay {background:#155160;color:white}
+#iqRangeStatus {margin:8px 0 0}
+#iqRangeStatus:empty {display:none}
+@media(max-width:620px){.iq-range-grid {grid-template-columns:1fr}}
 </style><link id="readiq-practice-style" rel="stylesheet" href="practice.css?v=0bf08f6759f7"><link id="readiq-word-style" rel="stylesheet" href="word-by-word.css?v=0a3193248d279500">
 </head>
 <body><header><div class="brand"><div class="brand-logo">☀️</div><div><h1>IRFAN-UL-QURAN <span class="brand-reflect">· READ • REFLECT</span></h1><small>DeTLeng Read IQ</small></div></div><div class="library-anchor"><button class="file-toggle" id="fileToggle" aria-expanded="false" aria-controls="fileMenu">📚 Library <span id="fileMenuCount">(0)</span> ▾</button><!-- READIQ_ABOUT_V1 --><a class="file-toggle readiq-about-link" href="about.html">About</a></div>
@@ -646,9 +670,9 @@ html:not(.readiq-mushaf-ready) #content .iq-surah-ar {visibility:hidden;}
 
 <main><div class="hero"><span><span class="status-dot"></span><span id="status">Opening library…</span></span></div>
 <div class="tab-wrap"><nav class="tabs" id="tabs" aria-label="Library documents"></nav></div><section class="reader"><div class="dochead"><h2 id="documentTitle">Welcome to your reading space</h2><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><input class="search" id="search" type="search" placeholder="Find in opened file…" aria-label="Search within document"><span id="languageSummary" class="language-summary"></span><span class="pill" id="fileCount">0 FILES</span></div></div><article class="content" id="content"><div class="empty"><div class="sun">📖</div><h2>Your reading journey starts here</h2><p>Choose a document from the Library to begin reading.</p></div></article></section><div class="footer">Read at your own pace. Reflect on every verse. · <a href="https://www.detleng.com/" target="_blank" rel="noopener noreferrer">Explore DeTLeng ↗</a></div></main>
-<script defer src="app.js?v=9dc6f1b4663ecc27"></script>
+<script defer src="app.js?v=7848ba0de3e16b73"></script>
 <script id="readiq-practice-script" defer src="practice.js?v=98f15cc15a9eb5c3"></script>
-<script id="readiq-word-script" defer src="word-by-word.js?v=c7ae0583b872aa09"></script>
+<script id="readiq-word-script" defer src="word-by-word.js?v=a548d02961b8871d"></script>
 <script>
 // DETLENG_ALIGNMENT_V1
 (()=>{
@@ -697,4 +721,28 @@ html:not(.readiq-mushaf-ready) #content .iq-surah-ar {visibility:hidden;}
  retry.onclick=load;load();
 })();
 
-</script></body></html>
+</script><dialog id="iqVerseRange" aria-labelledby="iqRangeTitle">
+ <h2 id="iqRangeTitle">Find by Verse Code</h2>
+ <form method="dialog" class="iq-range-close"><button type="submit">Close</button></form>
+ <form id="iqRangeForm" novalidate>
+  <div class="iq-range-grid">
+   <fieldset><legend>From</legend><div class="iq-range-fields">
+    <label>Para<input type="number" min="1" max="30" name="para" autofocus></label>
+    <label>Surah<input type="number" min="1" max="114" name="surah"></label>
+    <label>Verse<input type="number" min="1" name="verse"></label>
+   </div><output aria-live="polite"></output><button type="button" hidden></button></fieldset>
+   <fieldset><legend>To</legend><div class="iq-range-fields">
+    <label>Para<input type="number" min="1" max="30" name="para"></label>
+    <label>Surah<input type="number" min="1" max="114" name="surah"></label>
+    <label>Verse<input type="number" min="1" name="verse"></label>
+   </div><output aria-live="polite"></output><button type="button" hidden></button></fieldset>
+  </div>
+  <div class="iq-range-actions">
+   <label><input id="iqRangeSingle" type="checkbox"> Single verse</label>
+   <label><input id="iqRangeCopy" type="checkbox"> Copy From to To</label>
+   <button id="iqRangeDisplay" type="submit">Display range →</button>
+  </div>
+  <p id="iqRangeStatus" role="status"></p>
+ </form>
+</dialog>
+</body></html>

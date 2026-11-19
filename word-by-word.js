@@ -67,21 +67,39 @@ function describeSelection(data, choice){
   covered: sheets.reduce((sum, sheet) => sum + sheet.verseCount, 0)
  };
 }
+// READIQ_VERSE_RANGE_V1
+async function rangeWordSelection(data,choice){
+ const ids=new Set(choice.quarterIds.map(id=>id.replace(/^P(\d+)-Q(\d+)$/,'$1-$2')).map(id=>{
+  const [para,quarter]=id.split('-');
+  return para+'-'+String(Number(quarter)).padStart(2,'0');
+ }));
+ const sheets=data.sheets.filter(sheet=>ids.has(sheet.name));
+ const key=code=>String(code).replace(/[–]/g,'-').replace(/(^P|S|-)(0+)(?=\d)/g,'$1');
+ const order=new Map(choice.codes.map((code,index)=>[key(code),index]));
+ const rows=(await Promise.all(sheets.map(words))).flat().filter(word=>order.has(key(word.code)));
+ rows.sort((a,b)=>order.get(key(a.code))-order.get(key(b.code))||a.serial-b.serial);
+ return {sheets,rows,title:choice.title,expected:order.size,covered:new Set(rows.map(word=>key(word.code))).size};
+}
+
 async function coverage(choice){
- const {covered, expected} = describeSelection(await manifest(), choice);
+ const data = await manifest();
+ const {covered,expected} = choice.mode==='range'
+  ? await rangeWordSelection(data,choice) : describeSelection(data,choice);
  return {covered, expected};
 }
-async function load(showPartial = true){
- const ticket=++request,choice=selection();active=null;setBusy(true);$('wb-status').textContent='Opening word meanings…';$('wb-verses').replaceChildren();
+async function load(showPartial = true,choice=selection()){
+ const ticket=++request;active=null;setBusy(true);$('wb-status').textContent='Opening word meanings…';$('wb-verses').replaceChildren();
  try{
   const fresh = await manifest();
   if (ticket !== request) return;
   index = fresh;
-  const {sheets, title, expected, covered} = describeSelection(index, choice);
-  let rows=(await Promise.all(sheets.map(words))).flat();if(choice.mode==='surah')rows=rows.filter(w=>w.surah===choice.surah).sort((a,b)=>a.ayah-b.ayah||a.serial-b.serial);
+  const range = choice.mode==='range';
+  const {sheets,title,expected,covered,rows:rangeRows} = range
+   ? await rangeWordSelection(index,choice) : describeSelection(index,choice);
+  let rows=range ? rangeRows : (await Promise.all(sheets.map(words))).flat();if(choice.mode==='surah')rows=rows.filter(w=>w.surah===choice.surah).sort((a,b)=>a.ayah-b.ayah||a.serial-b.serial);
   if(ticket!==request)return;
   if(!rows.length){$('wb-title').textContent=title;$('wb-status').textContent='Word-by-Word content is not available for this selection yet.';notice('Word-by-Word content coming soon','Word-by-Word content for this section is in preparation. You can open another section to read the available content.');return}
-  const pending=sheets.filter(s=>!s.count).map(s=>s.name),partial=covered<expected||pending.length>0;
+  const pending=sheets.filter(s=>!s.count).map(s=>s.name),partial=covered<expected||(!range&&pending.length>0);
   active={rows,title,choice,revision:index.revision,partial,covered,expected};$('wb-title').textContent=title;
   $('wb-status').textContent=rows.length+' words · '+covered+'/'+expected+' ayat have word entries'+(partial?' · Available content only; this selection is still being prepared.':' · Word entries available for every ayat in this selection.');
   render();
@@ -104,7 +122,7 @@ for(const id of ['wb-urdu','wb-english','wb-full-ar','wb-full-ur','wb-full-en'])
 function font(n){size=Math.max(22,Math.min(48,n));root.style.setProperty('--wb-size',size+'px');$('wb-font').value=size;$('wb-font-value').textContent=size+'px'}
 $('wb-smaller').onclick=()=>font(size-2);$('wb-larger').onclick=()=>font(size+2);$('wb-font-reset').onclick=()=>font(31);$('wb-font').oninput=()=>font(Number($('wb-font').value));
 $('wb-exit').onclick=()=>{hide();document.querySelector('.iq-reading-practice button:last-child:not(:disabled)')?.focus()};$('wb-load').onclick=load;
-async function openWords(showPartial = true, selection = window.ReadIQWordBridge?.selection()){if(selection){$('wb-scope').value=selection.mode;$('wb-para').value=selection.para||1;$('wb-quarter').value=selection.quarter||1;$('wb-surah').value=selection.surah||1}controls();reveal();root.scrollIntoView({block:'start',behavior:'smooth'});await load(showPartial)}
+async function openWords(showPartial = true, selection = window.ReadIQWordBridge?.selection()){if(selection && selection.mode!=='range'){$('wb-scope').value=selection.mode;$('wb-para').value=selection.para||1;$('wb-quarter').value=selection.quarter||1;$('wb-surah').value=selection.surah||1}controls();reveal();root.scrollIntoView({block:'start',behavior:'smooth'});await load(showPartial,selection?.mode==='range'?selection:undefined)}
 $('wb-practice').onclick=()=>{if(!active)return;const current=active,langs=['ur','en'].filter(l=>$(l==='ur'?'wb-urdu':'wb-english').checked);if(!langs.length){notice('Choose an answer language.','Select Urdu, English or both, then open Word MCQs & Flashcards.');return}
  const context={title:'Word by Word · '+current.title+(current.partial ? ' · ' + current.covered + ' of ' + current.expected + ' verses available' : ''),mode:'word',rows:current.rows,languages:langs,revision:current.revision,sourceId:JSON.stringify(current.choice),onExit(){reveal();root.scrollIntoView({block:'start'})},async extraPool(){const all=(await Promise.all(index.sheets.filter(s=>s.count).map(words))).flat();return all}};
  try{if(!window.ReadIQPractice?.openContext)throw Error('Please refresh this page to load the practice update.');hide();window.ReadIQPractice.openContext(context)}catch(e){reveal();notice('Practice could not open.',e.message)}
