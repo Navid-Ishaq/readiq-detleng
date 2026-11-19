@@ -334,12 +334,28 @@ function appendReflectionCode(section, code, verse){
   };
   return button;
  });
- row.append(buttons[0],code,buttons[1]);
+ row.append(verseSettingsButton(verse),buttons[0],code,buttons[1]);
  appendLearnButtons(row,verse);
  section.append(row,status);
 }
 
-function render(){updateLanguageRow();if(readingMode==='asma'){renderAsma();return}content.classList.remove('asma-mode');if(readingMode==='about'){renderAbout();return}content.classList.remove('about-mode');
+function render(){
+ const verseCode = !settingsPanel.hidden && settingsOpener.dataset.verseSettings;
+ const before = verseCode ? settingsOpener.getBoundingClientRect().top : null;
+ renderReadingContent();
+ if (!verseCode) return;
+ const replacement = content.querySelector('[data-verse-settings="'+CSS.escape(verseCode)+'"]');
+ if (!replacement){
+  tools(false);
+  settings.focus({preventScroll:true});
+  return;
+ }
+ settingsOpener = replacement;
+ replacement.setAttribute('aria-expanded','true');
+ window.scrollBy({top:replacement.getBoundingClientRect().top-before,behavior:'instant'});
+ positionReadingSettings();
+}
+function renderReadingContent(){updateLanguageRow();if(readingMode==='asma'){renderAsma();return}content.classList.remove('asma-mode');if(readingMode==='about'){renderAbout();return}content.classList.remove('about-mode');
 if(readingMode==='selected-surahs'){renderSelectedSurahs();return}
 if(readingMode==='selected-verses'&&!verses.length)return;
 const langs=selectedLanguages();content.replaceChildren();document.getElementById('languageSummary').textContent=langs.map(k=>({ar:'Arabic',ur:'Urdu',en:'English'})[k]).join(' · ');document.getElementById('fileCount').textContent=verses.length+' VERSES';
@@ -368,15 +384,72 @@ document.getElementById('fullscreen').onclick=async()=>{try{if(document.fullscre
 // READIQ_SETTINGS_PANEL_V1
 const settings=document.getElementById('mobileToolsButton');
 const settingsPanel=document.getElementById('readingSettingsPanel');
-document.addEventListener('pointerdown',event=>{
- if(!settingsPanel.hidden&&!settingsPanel.contains(event.target)&&!settings.contains(event.target))tools(false);
-});
-header.addEventListener('keydown',event=>{
- if(event.key==='Escape'&&!settingsPanel.hidden){
-  tools(false);
-  settings.focus();
+// READIQ_VERSE_SETTINGS_V1
+let settingsOpener = settings;
+const settingsLabel = 'Reading settings · مطالعے کی ترتیبات';
+function verseSettingsButton(verse){
+ const button = document.createElement('button');
+ button.type = 'button';
+ button.className = 'iq-verse-settings';
+ button.dataset.verseSettings = verse.code;
+ button.textContent = '⚙';
+ button.title = settingsLabel;
+ button.setAttribute('aria-label',settingsLabel);
+ button.setAttribute('aria-controls',settingsPanel.id);
+ button.setAttribute('aria-expanded','false');
+ button.onclick = () => toggleReadingSettings(button);
+ return button;
+}
+function positionReadingSettings(){
+ if (settingsPanel.hidden || settingsOpener===settings || !settingsOpener.isConnected) return;
+ const anchor = settingsOpener.getBoundingClientRect();
+ const panel = settingsPanel.getBoundingClientRect();
+ const edge = 8, gap = 6;
+ const below = anchor.bottom + gap;
+ const above = anchor.top - panel.height - gap;
+ const top = below + panel.height > innerHeight-edge && above >= edge ? above : below;
+ settingsPanel.style.top = Math.max(edge,Math.min(top,innerHeight-panel.height-edge))+'px';
+ settingsPanel.style.left = Math.max(edge,Math.min(anchor.left,innerWidth-panel.width-edge))+'px';
+}
+function tools(open, opener = settings){
+ settingsOpener.setAttribute('aria-expanded','false');
+ settingsPanel.hidden = !open;
+ settingsOpener = open ? opener : settings;
+ const inline = open && opener!==settings;
+ settingsPanel.classList.toggle('iq-settings-near-verse',inline);
+ if (inline){
+  document.body.append(settingsPanel);
+  positionReadingSettings();
+ } else {
+  if (settingsPanel.parentElement!==settings.parentElement) settings.after(settingsPanel);
+  settingsPanel.style.removeProperty('top');
+  settingsPanel.style.removeProperty('left');
  }
-},{capture:true});function tools(open){settingsPanel.hidden=!open;settings.setAttribute('aria-expanded',String(open));requestAnimationFrame(positionMenu)}settings.onclick=()=>{setFileMenu(false);tools(settings.getAttribute('aria-expanded')!=='true')};
+ settingsOpener.setAttribute('aria-expanded',String(open));
+ requestAnimationFrame(positionMenu);
+}
+function toggleReadingSettings(opener){
+ const open = settingsPanel.hidden || settingsOpener!==opener;
+ setFileMenu(false);
+ tools(open,opener);
+ if (open && opener!==settings){
+  settingsPanel.querySelector('button:not([disabled]),input:not([disabled])')?.focus({preventScroll:true});
+ }
+}
+document.addEventListener('pointerdown',event=>{
+ if (!settingsPanel.hidden && !settingsPanel.contains(event.target) &&
+     !event.target.closest('#mobileToolsButton,[data-verse-settings]')) tools(false);
+});
+document.addEventListener('keydown',event=>{
+ if (event.key==='Escape' && !settingsPanel.hidden){
+  const opener = settingsOpener;
+  tools(false);
+  opener.focus({preventScroll:true});
+ }
+},{capture:true});
+window.addEventListener('scroll',positionReadingSettings,{passive:true});
+window.addEventListener('resize',positionReadingSettings);
+settings.onclick=()=>toggleReadingSettings(settings);
 function layout(){document.documentElement.style.setProperty('--read-header-height',header.getBoundingClientRect().height+'px');positionMenu()}
 new ResizeObserver(layout).observe(header);window.addEventListener('resize',layout);layout();
 function background(){const n=Math.floor(scrollY/900)%3;document.documentElement.style.setProperty('--scroll-bg',['#fff8d9','#e7f7ff','#eef9ea'][n]);document.documentElement.style.setProperty('--reader-bg',['#fffdf9','#f7fcff','#fbfff7'][n])}window.addEventListener('scroll',background,{passive:true});background();
