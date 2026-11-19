@@ -162,7 +162,7 @@ function reflectionReference(verse,lang){
  if (!arabicPara || !arabicSurah || !englishPara || !englishSurah) return null;
  const ur = `یہ سورۃ ${arabicSurah} کی آیت ${ayah} ہے، جو قرآنِ مجید کے پارہ نمبر ${para}، ${arabicPara}، میں ہے۔`;
  const en = `This is verse ${ayah} of Surah ${englishSurah[0].toUpperCase()+englishSurah.slice(1)} (${arabicSurah}) in Para ${para}, ${englishPara} (${arabicPara}), of the Qur’an.`;
- return {key:[para,surah,ayah].join(':'), sentence:lang==='ur' ? ur.replace(/[0-9]/g,d=>'۰۱۲۳۴۵۶۷۸۹'[Number(d)]) : en};
+ return {key:[para,surah,ayah].join(':'), sentence:lang==='ur' ? ur.replace(/[0-9]/g,d=>'۰۱۲۳۴۵۶٧۸۹'[Number(d)]) : en};
 }
 let learnDialog, learnRequest = 0;
 const reflectionCache = new Map();
@@ -217,6 +217,25 @@ async function openLearnReflection(verse,lang,opener){
  tools.append(close);
  footer.append(bottomClose);
  dialog.replaceChildren(heading,tools,body,footer);
+ // READIQ_REFLECTION_PANEL_FIX_V1
+ const expandLabel = ur ? 'مکمل وضاحت دیکھیے' : 'Open full explanation';
+ const compactLabel = ur ? 'مختصر منظر' : 'Compact view';
+ const expandButtons = [close,bottomClose].map(closeButton => {
+  const button = reflectionElement('button',expandLabel,lang);
+  button.type = 'button';
+  button.setAttribute('aria-expanded','false');
+  closeButton.before(button);
+  return button;
+ });
+ for (const button of expandButtons){
+  button.onclick = () => {
+   const expanded = dialog.classList.toggle('iq-learn-expanded');
+   for (const control of expandButtons){
+    control.setAttribute('aria-expanded',String(expanded));
+    control.textContent = expanded ? compactLabel : expandLabel;
+   }
+  };
+ }
  body.append(reflectionElement('p',ref.sentence,lang));
  for (const [source,language] of [[verse.ar,'ar'],[verse.ur,'ur'],[verse.en,'en']]){
   body.append(reflectionElement('p',source,language));
@@ -244,24 +263,6 @@ async function openLearnReflection(verse,lang,opener){
    explanation.append(block);
   }
   status.replaceWith(explanation);
-  const expandLabel = ur ? 'مکمل وضاحت دیکھیے' : 'Open full explanation';
-  const compactLabel = ur ? 'مختصر منظر' : 'Compact view';
-  const expandButtons = [close,bottomClose].map(closeButton => {
-   const button = reflectionElement('button',expandLabel,lang);
-   button.type = 'button';
-   button.setAttribute('aria-expanded','false');
-   closeButton.before(button);
-   return button;
-  });
-  for (const button of expandButtons){
-   button.onclick = () => {
-    const expanded = dialog.classList.toggle('iq-learn-expanded');
-    for (const control of expandButtons){
-     control.setAttribute('aria-expanded',String(expanded));
-     control.textContent = expanded ? compactLabel : expandLabel;
-    }
-   };
-  }
  } catch {
   if (request===learnRequest) status.textContent=ur?'وضاحت نہیں کھل سکی۔ دوبارہ کوشش کیجیے۔':'Could not open the explanation. Please try again.';
  }
