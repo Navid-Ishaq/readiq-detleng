@@ -209,8 +209,14 @@ async function openLearnReflection(verse,lang,opener){
  body.dir=ur?'rtl':'ltr';
  const tools = document.createElement('div');
  tools.className='iq-learn-controls';
+ // READIQ_REFLECTION_CONTROLS_V1
+ const footer = document.createElement('div');
+ footer.className = 'iq-learn-controls';
+ const bottomClose = close.cloneNode(true);
+ bottomClose.onclick = close.onclick;
  tools.append(close);
- dialog.replaceChildren(heading,tools,body);
+ footer.append(bottomClose);
+ dialog.replaceChildren(heading,tools,body,footer);
  body.append(reflectionElement('p',ref.sentence,lang));
  for (const [source,language] of [[verse.ar,'ar'],[verse.ur,'ur'],[verse.en,'en']]){
   body.append(reflectionElement('p',source,language));
@@ -238,15 +244,24 @@ async function openLearnReflection(verse,lang,opener){
    explanation.append(block);
   }
   status.replaceWith(explanation);
-  const expand=reflectionElement('button',ur?'مکمل وضاحت دیکھیے':'Open full explanation',lang);
-  expand.type='button';
-  expand.setAttribute('aria-expanded','false');
-  expand.onclick=()=>{
-   const expanded=dialog.classList.toggle('iq-learn-expanded');
-   expand.setAttribute('aria-expanded',String(expanded));
-   expand.textContent=expanded?(ur?'مختصر منظر':'Compact view'):(ur?'مکمل وضاحت دیکھیے':'Open full explanation');
-  };
-  body.append(expand);
+  const expandLabel = ur ? 'مکمل وضاحت دیکھیے' : 'Open full explanation';
+  const compactLabel = ur ? 'مختصر منظر' : 'Compact view';
+  const expandButtons = [close,bottomClose].map(closeButton => {
+   const button = reflectionElement('button',expandLabel,lang);
+   button.type = 'button';
+   button.setAttribute('aria-expanded','false');
+   closeButton.before(button);
+   return button;
+  });
+  for (const button of expandButtons){
+   button.onclick = () => {
+    const expanded = dialog.classList.toggle('iq-learn-expanded');
+    for (const control of expandButtons){
+     control.setAttribute('aria-expanded',String(expanded));
+     control.textContent = expanded ? compactLabel : expandLabel;
+    }
+   };
+  }
  } catch {
   if (request===learnRequest) status.textContent=ur?'وضاحت نہیں کھل سکی۔ دوبارہ کوشش کیجیے۔':'Could not open the explanation. Please try again.';
  }
