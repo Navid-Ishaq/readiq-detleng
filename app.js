@@ -472,6 +472,7 @@ if(index>0)appendSurahHeading(v.code);
 if(index>0 && window.ReadIQBismillah.applies(v.code))content.append(window.ReadIQBismillah.block());
  const section = document.createElement('section');
  section.className = 'verse';
+ section.dataset.readingColumns = String(langs.length);
  section.setAttribute('aria-label',v.code);
  const code = document.createElement('div');
  code.className = 'verse-code';
@@ -1246,7 +1247,33 @@ findVerseButton.type = 'button';
 findVerseButton.className = 'file-toggle';
 findVerseButton.textContent = '🔎 Find by Verse Code';
 findVerseButton.onclick = openVerseFinder;
-for(const control of [findVerseButton,fileToggle,paraToggle,selectedSurahsButton,surahToggle,asmaToggle,aboutLink]){
+// READIQ_READING_LAYOUT_V1
+const readingLayout = document.createElement('details');
+readingLayout.className = 'iq-layout-selector';
+const readingLayoutLabel = document.createElement('summary');
+readingLayoutLabel.textContent = 'Reading Layout';
+readingLayout.append(readingLayoutLabel);
+const layoutChoices = ['Row','Column'].map(label=>{
+ const button = document.createElement('button');
+ button.type = 'button';
+ button.className = 'file-toggle';
+ button.dataset.layout = label.toLowerCase();
+ button.onclick = ()=>setReadingLayout(button.dataset.layout);
+ readingLayout.append(button);
+ return [label,button];
+});
+function setReadingLayout(mode){
+ const layout = mode==='column'?'column':'row';
+ content.dataset.readingLayout = layout;
+ save('readiq-reading-layout',layout);
+ for (const [label,button] of layoutChoices){
+  const active = button.dataset.layout===layout;
+  button.textContent = (active?'✓ ':'')+label;
+  button.setAttribute('aria-pressed',String(active));
+ }
+}
+setReadingLayout(saved('readiq-reading-layout','row'));
+for(const control of [findVerseButton,readingLayout,fileToggle,paraToggle,selectedSurahsButton,surahToggle,asmaToggle,aboutLink]){
  exploreMenu.append(control);
 }
 function positionExplore() {
@@ -1257,6 +1284,7 @@ function positionExplore() {
  exploreMenu.style.top = Math.ceil(header.getBoundingClientRect().bottom)+6+'px';
 }
 function hideExplore() {
+ readingLayout.open = false;
  exploreMenu.hidden = true;
  exploreToggle.setAttribute('aria-expanded','false');
 }
