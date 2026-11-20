@@ -162,7 +162,7 @@ function reflectionReference(verse,lang){
  if (!arabicPara || !arabicSurah || !englishPara || !englishSurah) return null;
  const ur = `یہ سورۃ ${arabicSurah} کی آیت ${ayah} ہے، جو قرآنِ مجید کے پارہ نمبر ${para}، ${arabicPara}، میں ہے۔`;
  const en = `This is verse ${ayah} of Surah ${englishSurah[0].toUpperCase()+englishSurah.slice(1)} (${arabicSurah}) in Para ${para}, ${englishPara} (${arabicPara}), of the Qur’an.`;
- return {key:[para,surah,ayah].join(':'), sentence:lang==='ur' ? ur.replace(/[0-9]/g,d=>'۰۱۲۳۴۵۶٧۸۹'[Number(d)]) : en};
+ return {key:[para,surah,ayah].join(':'), sentence:lang==='ur' ? ur.replace(/[0-9]/g,d=>'۰۱۲۳۴۵۶۷۸۹'[Number(d)]) : en};
 }
 let learnDialog, learnRequest = 0;
 const reflectionCache = new Map();
