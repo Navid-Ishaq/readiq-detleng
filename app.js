@@ -955,6 +955,23 @@ function selectedBackButton(){
  button.onclick = openSelectedSurahs;
  return button;
 }
+// READIQ_MORNING_DUA_V1
+const morningDuaDialog = document.getElementById('iqMorningDua');
+const morningDuaPlayer = document.getElementById('iqMorningDuaPlayer');
+function openMorningDua(){
+ if (morningDuaDialog.open) return;
+ const frame = document.createElement('iframe');
+ frame.title = 'Morning Dua by Omar Hisham Al Arabi';
+ frame.src = 'https://www.youtube-nocookie.com/embed/7_dY3sP0nF8';
+ frame.allow = 'encrypted-media; picture-in-picture; fullscreen';
+ frame.allowFullscreen = true;
+ frame.referrerPolicy = 'strict-origin-when-cross-origin';
+ morningDuaPlayer.replaceChildren(frame);
+ morningDuaDialog.showModal();
+ morningDuaDialog.scrollTop = 0;
+}
+morningDuaDialog.addEventListener('close',()=>morningDuaPlayer.replaceChildren());
+
 function renderSelectedSurahs(){
  const previous = new Set([...content.querySelectorAll('details[open][data-selected-card]')]
   .map(card => card.dataset.selectedCard));
@@ -991,6 +1008,17 @@ function renderSelectedSurahs(){
    }
    li.append(button);
    list.append(li);
+  }
+  if (name === 'Daily'){
+   const item = document.createElement('li');
+   const button = document.createElement('button');
+   button.type = 'button';
+   button.setAttribute('aria-haspopup','dialog');
+   button.setAttribute('aria-controls',morningDuaDialog.id);
+   bilingualLabel(button,'☀ Morning Dua','صبح کی دعا');
+   button.onclick = openMorningDua;
+   item.append(button);
+   list.append(item);
   }
   card.append(summary, list);
   grid.append(card);
