@@ -676,6 +676,49 @@ function buildFurtherReading() {
  section.append(list);
  return section;
 }
+// READIQ_ABOUT_VIDEOS_V1
+const irfanAboutVideos = [
+ {
+  id:'bTLw9amKtwE',
+  url:'https://minhaj.tv/english/clip/1000078/About-Dr-TahiulQadri-Tahir-Qadri-Minhaj-ul-Quran-Minhaj-ul-Quran.html',
+  en:['Who Is Professor Dr. Muhammad Tahir-ul-Qadri?', 'The first part of a documentary series introducing Professor Dr. Muhammad Tahir-ul-Qadri and Minhaj-ul-Quran.', 'Watch on Minhaj.TV'],
+  ur:['پروفیسر ڈاکٹر محمد طاہر القادری کون ہیں؟', 'اس دستاویزی سلسلے کی پہلی قسط میں پروفیسر ڈاکٹر محمد طاہر القادری اور منہاج القرآن کا تعارف پیش کیا گیا ہے۔', 'منہاج ٹی وی پر دیکھیے']
+ },
+ {
+  id:'XQjIWqpCNxo',
+  url:'https://www.youtube.com/watch?v=XQjIWqpCNxo',
+  en:['Biography of Professor Dr. Muhammad Tahir-ul-Qadri', 'A longer biographical discussion about the life of Professor Dr. Muhammad Tahir-ul-Qadri.', 'Watch on YouTube'],
+  ur:['پروفیسر ڈاکٹر محمد طاہر القادری کی سوانحی گفتگو', 'پروفیسر ڈاکٹر محمد طاہر القادری کی زندگی کے بارے میں ایک تفصیلی سوانحی گفتگو۔', 'یوٹیوب پر دیکھیے']
+ }
+];
+function buildIrfanVideos(language){
+ const videos = document.createElement('div');
+ videos.className = 'iq-about-videos';
+ for (const video of irfanAboutVideos){
+  const [heading,description,label] = video[language];
+  const card = document.createElement('section');
+  card.className = 'iq-about-video';
+  const title = document.createElement('h3');
+  title.textContent = heading;
+  const frame = document.createElement('iframe');
+  frame.title = heading;
+  frame.src = 'https://www.youtube-nocookie.com/embed/' + video.id;
+  frame.loading = 'lazy';
+  frame.referrerPolicy = 'strict-origin-when-cross-origin';
+  frame.allow = 'encrypted-media; picture-in-picture; fullscreen';
+  frame.allowFullscreen = true;
+  const text = document.createElement('p');
+  text.textContent = description;
+  const link = document.createElement('a');
+  link.href = video.url;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.textContent = label + ' ↗';
+  card.append(title,frame,text,link);
+  videos.append(card);
+ }
+ return videos;
+}
 function renderAbout(){
  content.classList.remove('asma-mode');
  content.classList.add('about-mode');
@@ -711,6 +754,7 @@ function renderAbout(){
     const template = aboutSource.find(item => item.id === 'readiq-' + aboutLanguage);
     copy.append(...Array.from(template.children, child => child.cloneNode(true)));
    } else {
+    copy.append(buildIrfanVideos(aboutLanguage));
     for (const id of [4, 5, 9]) {
      const section = article.querySelector('#' + aboutLanguage + '-topic-' + id);
      if (section) copy.append(section.cloneNode(true));
