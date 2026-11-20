@@ -311,6 +311,7 @@ async function copyReflection(text){
   finally { box.remove(); active?.focus(); }
  }
 }
+// READIQ_VERSE_OPTIONS_V1
 function appendReflectionCode(section, code, verse){
  const row = document.createElement('div');
  row.className = 'iq-reflection-code';
@@ -337,13 +338,56 @@ function appendReflectionCode(section, code, verse){
  });
  row.append(verseSettingsButton(verse),buttons[0],code,buttons[1]);
  appendLearnButtons(row,verse);
- section.append(row,status);
+ const options = document.createElement('div');
+ options.className = 'iq-verse-options';
+ options.id = 'iqVerseOptions-' + verse.code;
+ options.hidden = true;
+ options.append(row,status);
+ section.append(options);
+ return options;
+}
+function verseOptionsButton(options){
+ const button = document.createElement('button');
+ button.type = 'button';
+ button.className = 'iq-verse-options-toggle';
+ button.textContent = '⚙';
+ button.title = 'Verse options · آیت کے اختیارات';
+ button.setAttribute('aria-label',button.title);
+ button.setAttribute('aria-controls',options.id);
+ button.setAttribute('aria-expanded','false');
+ button.onclick = () => {
+  const opening = options.hidden;
+  const previous = content.querySelector('.iq-verse-options-toggle[aria-expanded="true"]');
+  const before = button.getBoundingClientRect().top;
+  if (previous){
+   const previousOptions = document.getElementById(previous.getAttribute('aria-controls'));
+   if (!settingsPanel.hidden && previousOptions.contains(settingsOpener)) tools(false);
+   previousOptions.hidden = true;
+   previous.setAttribute('aria-expanded','false');
+  }
+  if (opening){
+   options.hidden = false;
+   button.setAttribute('aria-expanded','true');
+  }
+  const delta = button.getBoundingClientRect().top - before;
+  if (delta) window.scrollBy({top:delta,behavior:'instant'});
+ };
+ return button;
 }
 
 function render(){
  const verseCode = !settingsPanel.hidden && settingsOpener.dataset.verseSettings;
  const before = verseCode ? settingsOpener.getBoundingClientRect().top : null;
+ const expanded = content.querySelector('.iq-verse-options-toggle[aria-expanded="true"]')?.getAttribute('aria-controls');
  renderReadingContent();
+ if (expanded){
+  const options = document.getElementById(expanded);
+  const toggle = content.querySelector('[aria-controls="'+CSS.escape(expanded)+'"]');
+  if (options && toggle){
+   options.hidden = false;
+   toggle.setAttribute('aria-expanded','true');
+  }
+ }
  if (!verseCode) return;
  const replacement = content.querySelector('[data-verse-settings="'+CSS.escape(verseCode)+'"]');
  if (!replacement){
@@ -426,7 +470,31 @@ if(!verses.length){const p=document.createElement('p');p.className='empty';p.tex
 for(const [index,v] of verses.entries()){
 if(index>0)appendSurahHeading(v.code);
 if(index>0 && window.ReadIQBismillah.applies(v.code))content.append(window.ReadIQBismillah.block());
-const section=document.createElement('section');section.className='verse';section.setAttribute('aria-label',v.code);const code=document.createElement('div');code.className='verse-code';code.dir='ltr';code.textContent=v.code;appendReflectionCode(section,code,v);for(const k of ['ar','ur','en']){if(!langs.includes(k))continue;const p=document.createElement('p');p.className='verse-'+k;p.lang=k;p.dir=k==='en'?'ltr':'rtl';p.textContent=k==='ar'?cleanArabicEnd(v[k]):cleanTranslationMarkers(v[k]);section.append(p)}content.append(section)}appendReadingNeighbors();highlight();}
+ const section = document.createElement('section');
+ section.className = 'verse';
+ section.setAttribute('aria-label',v.code);
+ const code = document.createElement('div');
+ code.className = 'verse-code';
+ code.dir = 'ltr';
+ code.textContent = v.code;
+ const options = appendReflectionCode(section,code,v);
+ const firstLanguage = ['ar','ur','en'].find(lang=>langs.includes(lang));
+ for (const lang of ['ar','ur','en']){
+  if (!langs.includes(lang)) continue;
+  const line = document.createElement('p');
+  line.className = 'verse-'+lang;
+  line.lang = lang;
+  line.dir = lang==='en'?'ltr':'rtl';
+  const words = document.createElement('span');
+  words.className = 'iq-verse-text';
+  words.textContent = lang==='ar'?cleanArabicEnd(v[lang]):cleanTranslationMarkers(v[lang]);
+  line.append(words);
+  if (lang===firstLanguage) line.append(verseOptionsButton(options));
+  section.insertBefore(line,options);
+ }
+ content.append(section);
+}
+appendReadingNeighbors();highlight();}
 function highlight(){content.querySelectorAll('mark').forEach(m=>m.replaceWith(document.createTextNode(m.textContent)));content.normalize();const term=search.value.trim();if(!term)return;const walker=document.createTreeWalker(content,NodeFilter.SHOW_TEXT),nodes=[];let node;while(node=walker.nextNode())if(node.nodeValue.toLowerCase().includes(term.toLowerCase()))nodes.push(node);for(const n of nodes){const raw=n.nodeValue,frag=document.createDocumentFragment();let pos=0,at;while((at=raw.toLowerCase().indexOf(term.toLowerCase(),pos))!==-1){frag.append(document.createTextNode(raw.slice(pos,at)));const m=document.createElement('mark');m.className='match';m.textContent=raw.slice(at,at+term.length);frag.append(m);pos=at+term.length}frag.append(document.createTextNode(raw.slice(pos)));n.replaceWith(frag)}}
 checks.forEach(c=>c.onchange=()=>{save('readiq-languages',selectedLanguages());render()});search.oninput=()=>{highlight();content.querySelector('mark')?.scrollIntoView({block:'center',behavior:'smooth'})};
 async function openFile(file){window.ReadIQWordByWord?.hide();window.ReadIQPractice?.hide();clearAsmaHash();readingMode='quarter';save('readiq-mode','quarter');selected=file;save('readiq-selected',file.id);renderLibrary();renderParasMenu();renderSurahsMenu();const n=++token;verses=[];search.value='';title.textContent='Para-'+String(file.para).padStart(2,'0')+' · '+file.label;content.textContent='Opening quarter…';try{const r=await fetch(file.url,{cache:'no-store'});if(!r.ok)throw Error('Cannot open quarter');const data=await r.json();if(n!==token)return;verses=data.verses;render();document.getElementById('status').textContent=verses.length+' verses in this quarter'}catch(e){if(n===token)content.textContent=e.message}}
